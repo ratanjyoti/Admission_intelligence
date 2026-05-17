@@ -1,0 +1,44 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="28" fill="#E2E8F0"/>
+  <rect x="40" y="24" width="880" height="492" rx="24" fill="#F8FAFC"/>
+  <rect x="40" y="24" width="880" height="64" rx="24" fill="#0F172A"/>
+  <circle cx="84" cy="56" r="8" fill="#F97316"/>
+  <circle cx="112" cy="56" r="8" fill="#FACC15"/>
+  <circle cx="140" cy="56" r="8" fill="#22C55E"/>
+  <text x="184" y="63" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">Docstribe Admission Intelligence</text>
+  <rect x="72" y="120" width="332" height="64" rx="18" fill="white"/>
+  <text x="96" y="148" fill="#0F172A" font-family="Arial, sans-serif" font-size="24" font-weight="700">Admission Intelligence Dashboard</text>
+  <text x="96" y="170" fill="#64748B" font-family="Arial, sans-serif" font-size="13">AI-driven patient prioritization, risk visibility, and workflow coordination.</text>
+  <rect x="720" y="122" width="152" height="42" rx="21" fill="#DCFCE7"/>
+  <text x="752" y="148" fill="#15803D" font-family="Arial, sans-serif" font-size="14" font-weight="700">API Connected</text>
+  <rect x="72" y="208" width="184" height="92" rx="20" fill="white"/>
+  <rect x="280" y="208" width="184" height="92" rx="20" fill="white"/>
+  <rect x="488" y="208" width="184" height="92" rx="20" fill="white"/>
+  <rect x="696" y="208" width="184" height="92" rx="20" fill="white"/>
+  <text x="96" y="238" fill="#64748B" font-family="Arial, sans-serif" font-size="14">Total Patients</text>
+  <text x="96" y="278" fill="#0F172A" font-family="Arial, sans-serif" font-size="34" font-weight="700">422</text>
+  <text x="304" y="238" fill="#64748B" font-family="Arial, sans-serif" font-size="14">Critical Patients</text>
+  <text x="304" y="278" fill="#DC2626" font-family="Arial, sans-serif" font-size="34" font-weight="700">14</text>
+  <text x="512" y="238" fill="#64748B" font-family="Arial, sans-serif" font-size="14">Emergency Admissions</text>
+  <text x="512" y="278" fill="#EA580C" font-family="Arial, sans-serif" font-size="34" font-weight="700">35</text>
+  <text x="720" y="238" fill="#64748B" font-family="Arial, sans-serif" font-size="14">ICU Required</text>
+  <text x="720" y="278" fill="#2563EB" font-family="Arial, sans-serif" font-size="34" font-weight="700">16</text>
+  <rect x="72" y="324" width="392" height="144" rx="22" fill="white"/>
+  <rect x="488" y="324" width="392" height="144" rx="22" fill="white"/>
+  <text x="96" y="354" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Risk Distribution</text>
+  <rect x="104" y="422" width="38" height="18" rx="9" fill="#DC2626"/>
+  <rect x="160" y="388" width="38" height="52" rx="9" fill="#F97316"/>
+  <rect x="216" y="368" width="38" height="72" rx="9" fill="#EAB308"/>
+  <rect x="272" y="402" width="38" height="38" rx="9" fill="#16A34A"/>
+  <rect x="328" y="348" width="90" height="12" rx="6" fill="#E2E8F0"/>
+  <rect x="328" y="372" width="64" height="12" rx="6" fill="#E2E8F0"/>
+  <rect x="328" y="396" width="78" height="12" rx="6" fill="#E2E8F0"/>
+  <text x="512" y="354" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">AI-Prioritized Patient Worklist</text>
+  <rect x="512" y="372" width="336" height="12" rx="6" fill="#E2E8F0"/>
+  <rect x="520" y="404" width="328" height="16" rx="8" fill="#F8FAFC"/>
+  <rect x="520" y="432" width="328" height="16" rx="8" fill="#F8FAFC"/>
+  <rect x="520" y="460" width="328" height="16" rx="8" fill="#F8FAFC"/>
+  <rect x="768" y="404" width="64" height="16" rx="8" fill="#0F172A"/>
+  <rect x="768" y="432" width="64" height="16" rx="8" fill="#0F172A"/>
+  <rect x="768" y="460" width="64" height="16" rx="8" fill="#0F172A"/>
+</svg>

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  background-color: #f8fafc;
+  font-family: Inter, system-ui, sans-serif;
+  color: #0f172a;
+}
+
+@page {
+  margin: 16mm;
+}
+
+@media print {
+  body {
+    background-color: #ffffff;
+  }
+}

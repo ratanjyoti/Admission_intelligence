@@ -1,0 +1,37 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="28" fill="#E2E8F0"/>
+  <rect x="40" y="24" width="880" height="492" rx="24" fill="#F8FAFC"/>
+  <rect x="40" y="24" width="880" height="64" rx="24" fill="#0F172A"/>
+  <circle cx="84" cy="56" r="8" fill="#F97316"/>
+  <circle cx="112" cy="56" r="8" fill="#FACC15"/>
+  <circle cx="140" cy="56" r="8" fill="#22C55E"/>
+  <text x="184" y="63" fill="white" font-family="Arial, sans-serif" font-size="24" font-weight="700">Patient AI Admission Report</text>
+  <rect x="72" y="116" width="816" height="82" rx="22" fill="white"/>
+  <text x="96" y="146" fill="#0F172A" font-family="Arial, sans-serif" font-size="28" font-weight="700">NZAMOKITHAN</text>
+  <text x="96" y="172" fill="#64748B" font-family="Arial, sans-serif" font-size="14">Nephrologist | Vishal Saxena.</text>
+  <rect x="640" y="132" width="92" height="28" rx="14" fill="#FEE2E2"/>
+  <rect x="744" y="132" width="96" height="28" rx="14" fill="#FFEDD5"/>
+  <text x="662" y="150" fill="#B91C1C" font-family="Arial, sans-serif" font-size="12" font-weight="700">Critical</text>
+  <text x="772" y="150" fill="#C2410C" font-family="Arial, sans-serif" font-size="12" font-weight="700">Emergency</text>
+  <rect x="72" y="220" width="392" height="120" rx="22" fill="white"/>
+  <rect x="496" y="220" width="392" height="120" rx="22" fill="white"/>
+  <rect x="72" y="360" width="392" height="120" rx="22" fill="white"/>
+  <rect x="496" y="360" width="392" height="120" rx="22" fill="white"/>
+  <text x="96" y="250" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Risk Summary</text>
+  <text x="96" y="276" fill="#64748B" font-family="Arial, sans-serif" font-size="13">Score 10/10, Critical category, emergency indicators and renal risk factors.</text>
+  <rect x="96" y="294" width="220" height="10" rx="5" fill="#E2E8F0"/>
+  <rect x="96" y="314" width="180" height="10" rx="5" fill="#E2E8F0"/>
+  <text x="520" y="250" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Admission Decision</text>
+  <text x="520" y="276" fill="#64748B" font-family="Arial, sans-serif" font-size="13">Emergency admission recommended with ICU routing and clinician review.</text>
+  <rect x="520" y="294" width="236" height="10" rx="5" fill="#E2E8F0"/>
+  <rect x="520" y="314" width="204" height="10" rx="5" fill="#E2E8F0"/>
+  <text x="96" y="390" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Evidence</text>
+  <rect x="96" y="410" width="120" height="18" rx="9" fill="#DBEAFE"/>
+  <rect x="96" y="438" width="310" height="10" rx="5" fill="#E2E8F0"/>
+  <rect x="96" y="458" width="264" height="10" rx="5" fill="#E2E8F0"/>
+  <text x="520" y="390" fill="#0F172A" font-family="Arial, sans-serif" font-size="18" font-weight="700">Clinical Notes Search</text>
+  <rect x="520" y="408" width="300" height="34" rx="17" fill="#F8FAFC" stroke="#CBD5E1"/>
+  <text x="540" y="430" fill="#94A3B8" font-family="Arial, sans-serif" font-size="13">Search within clinical notes...</text>
+  <rect x="520" y="454" width="320" height="10" rx="5" fill="#E2E8F0"/>
+  <rect x="520" y="474" width="280" height="10" rx="5" fill="#E2E8F0"/>
+</svg>
