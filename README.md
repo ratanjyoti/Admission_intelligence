@@ -171,9 +171,14 @@ Set the environment variable before deploy:
 VITE_API_BASE_URL=https://your-render-backend-url
 ```
 
-- Import the `frontend/` app into Vercel
+- Import the repository into Vercel and set:
+- Root Directory: `frontend`
+- Build Command: `npm run build`
+- Output Directory: `dist`
 - Keep `frontend/vercel.json` for SPA routing support
 - After deploy, verify the navbar shows `API Connected` against the Render backend
+
+If Vercel accidentally imports the repository root instead of the `frontend/` app, the root [vercel.json](C:/Users/LENOVO/Downloads/Docstribe/vercel.json:1) now points the build back to `frontend/`. The recommended setup is still to deploy the `frontend` directory directly.
 
 ## Verification
 
