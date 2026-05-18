@@ -11,12 +11,15 @@ frontend/dist/
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+backend/.env
+.env
 
 # Preserve accidental nested repo backup without committing it
 frontend/.git.frontend-backup/
 
 # Logs
 *.log
+backend/ml_models/*.joblib
 
 # Notebook checkpoints
 .ipynb_checkpoints/

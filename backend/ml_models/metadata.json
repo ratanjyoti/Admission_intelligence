@@ -1,0 +1,75 @@
+{
+  "model_version": "v2.0",
+  "trained_on": "2026-05-18T17:06:50Z",
+  "training_rows": 422,
+  "features": {
+    "text": [
+      "clinical_text"
+    ],
+    "categorical": [
+      "department",
+      "customer_type",
+      "primary_cohort",
+      "procedure_bucket",
+      "repeat_visit"
+    ],
+    "numeric": [
+      "visit_count",
+      "first_visit_risk_score",
+      "red_flag_count",
+      "symptom_count",
+      "comorbidity_count",
+      "medication_count",
+      "history_surgery_count",
+      "history_condition_count",
+      "history_family_count",
+      "investigation_count",
+      "doctor_advice_length",
+      "clinical_note_length",
+      "text_length",
+      "procedure_detected",
+      "risk_score_rule",
+      "risk_score_delta",
+      "evidence_count",
+      "has_emergency_keyword",
+      "has_renal_keyword",
+      "has_oncology_keyword",
+      "has_neuro_keyword",
+      "has_cardiac_keyword",
+      "has_respiratory_keyword",
+      "has_orthopedic_keyword",
+      "has_infection_keyword",
+      "has_major_procedure",
+      "has_surgical_keyword",
+      "has_refusal_keyword",
+      "emergency_keyword_count",
+      "renal_keyword_count",
+      "oncology_keyword_count",
+      "neuro_keyword_count",
+      "cardiac_keyword_count",
+      "respiratory_keyword_count",
+      "orthopedic_keyword_count",
+      "infection_keyword_count"
+    ]
+  },
+  "targets": [
+    "risk_category",
+    "admission_type",
+    "bed_type",
+    "icu_requirement",
+    "readmission_risk",
+    "length_of_stay",
+    "deferred_time",
+    "revenue_category"
+  ],
+  "selected_models": {
+    "risk_category": "xgboost",
+    "admission_type": "logistic_regression",
+    "bed_type": "lightgbm",
+    "icu_requirement": "logistic_regression",
+    "readmission_risk": "logistic_regression",
+    "length_of_stay": "xgboost",
+    "deferred_time": "lightgbm",
+    "revenue_category": "logistic_regression"
+  }
+}

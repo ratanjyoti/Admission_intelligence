@@ -88,6 +88,10 @@ export function countBy(items, selector) {
   return Array.from(counts.entries()).map(([name, value]) => ({ name, value }));
 }
 
+function getMidLakhs(patient) {
+  return Number(patient.operational?.packageIntelligence?.midLakhs || 0);
+}
+
 export function buildDashboardSummary(patients) {
   return {
     totalPatients: patients.length,
@@ -96,6 +100,54 @@ export function buildDashboardSummary(patients) {
     icuPatients: patients.filter((patient) => patient.bed?.type === "ICU").length,
     repeatPatients: patients.filter((patient) => patient.journey?.repeatVisit === "Yes").length,
     validatedPatients: patients.filter((patient) => patient.validation?.status === "Validated").length,
+    highRevenueCases: patients.filter((patient) =>
+      ["High Value", "Strategic Value"].includes(
+        patient.operational?.packageIntelligence?.revenueCategory
+      )
+    ).length,
+    cannotBeDelayedCases: patients.filter(
+      (patient) => patient.operational?.deferredTime?.label === "Cannot be safely delayed"
+    ).length,
+    highReadmissionRiskCases: patients.filter(
+      (patient) => patient.operational?.readmissionRisk?.label === "High"
+    ).length,
+    worseningPatients: patients.filter(
+      (patient) => patient.journey?.progressionTrend === "Worsening"
+    ).length,
+    surgicalOpportunities: patients.filter(
+      (patient) => patient.operational?.caseType?.label === "Surgical"
+    ).length,
+    renalCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Renal")
+    ).length,
+    oncologyCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Oncology")
+    ).length,
+    cardiacCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Cardiac")
+    ).length,
+    orthopedicCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Orthopedic")
+    ).length,
+    neurologyCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Neurology")
+    ).length,
+    respiratoryCohortPatients: patients.filter((patient) =>
+      patient.operational?.clinicalIntelligence?.diseaseCohorts?.includes("Respiratory")
+    ).length,
+    totalAddressableRevenueLakhs:
+      Math.round(patients.reduce((total, patient) => total + getMidLakhs(patient), 0) * 10) / 10,
+    revenueAtRiskLakhs:
+      Math.round(
+        patients.reduce((total, patient) => {
+          const highValue = ["High Value", "Strategic Value"].includes(
+            patient.operational?.packageIntelligence?.revenueCategory
+          );
+          const highNoShow = patient.operational?.noShowRisk?.label === "High";
+
+          return total + (highValue && highNoShow ? getMidLakhs(patient) : 0);
+        }, 0) * 10
+      ) / 10,
     departmentCount: new Set(patients.map((patient) => patient.department || "Unknown")).size,
   };
 }
@@ -142,6 +194,10 @@ export function buildDashboardCharts(patients) {
       ADMISSION_ORDER
     ),
     bedDistribution: countBy(patients, (patient) => patient.bed?.type).sort(sortByValueDescending),
+    cohortDistribution: countBy(
+      patients,
+      (patient) => patient.operational?.clinicalIntelligence?.primaryCohort
+    ).sort(sortByValueDescending),
     departmentMetrics: Array.from(departmentMetrics.values()).sort(
       (a, b) => b.totalPatients - a.totalPatients || a.department.localeCompare(b.department)
     ),

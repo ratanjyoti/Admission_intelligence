@@ -3,3 +3,13 @@ openpyxl
 numpy
 fastapi
 uvicorn[standard]
+openai
+python-dotenv
+sqlalchemy
+psycopg2-binary
+scikit-learn
+joblib
+xgboost
+lightgbm
+PyMuPDF
+python-multipart

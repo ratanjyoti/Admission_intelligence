@@ -2,12 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  BadgePercent,
   BedDouble,
+  CalendarRange,
+  Coins,
   Download,
   Printer,
+  Repeat2,
   Search,
   ShieldCheck,
   Siren,
+  TimerReset,
   TriangleAlert,
 } from "lucide-react";
 import {
@@ -66,9 +71,158 @@ function DetailItem({ label, value }) {
   );
 }
 
-function ReportSection({ title, children }) {
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+  tone = "slate",
+}) {
+  const tones = {
+    slate: "border-slate-200 bg-white text-slate-900",
+    blue: "border-blue-200 bg-blue-50 text-blue-900",
+    green: "border-green-200 bg-green-50 text-green-900",
+    orange: "border-orange-200 bg-orange-50 text-orange-900",
+    red: "border-red-200 bg-red-50 text-red-900",
+    purple: "border-purple-200 bg-purple-50 text-purple-900",
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+    <div className={`rounded-2xl border p-4 ${tones[tone] || tones.slate}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            {label}
+          </p>
+          <p className="mt-2 text-base font-semibold leading-6 text-current">
+            {value || "Not available"}
+          </p>
+        </div>
+        {Icon ? (
+          <div className="rounded-xl bg-white/70 p-2 text-current">
+            <Icon className="h-4 w-4" />
+          </div>
+        ) : null}
+      </div>
+      {hint ? <p className="mt-2 text-sm leading-6 text-slate-600">{hint}</p> : null}
+    </div>
+  );
+}
+
+function ChipList({ items, emptyLabel = "Not available", tone = "slate" }) {
+  const tones = {
+    slate: "bg-slate-100 text-slate-700",
+    blue: "bg-blue-100 text-blue-700",
+    green: "bg-green-100 text-green-700",
+    orange: "bg-orange-100 text-orange-700",
+    red: "bg-red-100 text-red-700",
+  };
+
+  if (!items || items.length === 0) {
+    return <p className="text-sm text-slate-500">{emptyLabel}</p>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => {
+        const label =
+          typeof item === "string"
+            ? item
+            : item.code
+              ? `${item.code} ${item.label}`
+              : item.label;
+
+        return (
+          <span
+            key={label}
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${tones[tone]}`}
+          >
+            {label}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+function RiskGauge({ score, category }) {
+  const numericScore = Math.max(0, Math.min(10, Number(score || 0)));
+  const percentage = numericScore / 10;
+  const circumference = 2 * Math.PI * 44;
+  const dashOffset = circumference - percentage * circumference;
+  const colors = {
+    Critical: "#dc2626",
+    High: "#f97316",
+    Medium: "#eab308",
+    Low: "#16a34a",
+  };
+  const stroke = colors[category] || "#334155";
+
+  return (
+    <div className="flex items-center gap-4">
+      <div className="relative h-28 w-28">
+        <svg viewBox="0 0 120 120" className="h-28 w-28 -rotate-90">
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#e2e8f0" strokeWidth="10" />
+          <circle
+            cx="60"
+            cy="60"
+            r="44"
+            fill="none"
+            stroke={stroke}
+            strokeWidth="10"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={dashOffset}
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <p className="text-3xl font-bold text-slate-900">{numericScore}</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            / 10
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Clinical Urgency
+        </p>
+        <p className="mt-1 text-lg font-semibold text-slate-900">{category}</p>
+        <p className="mt-2 max-w-xs text-sm leading-6 text-slate-600">
+          Visualized from the current AI risk score so high-acuity cases stand out immediately.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HistoryGroup({ title, items, emptyLabel }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4">
+      <p className="text-sm font-semibold text-slate-900">{title}</p>
+      {items && items.length > 0 ? (
+        <ul className="mt-3 space-y-2 text-sm text-slate-700">
+          {items.map((item) => (
+            <li key={`${title}-${item.label}`} className="rounded-lg bg-slate-50 px-3 py-2">
+              <p className="font-medium text-slate-800">{item.label}</p>
+              {item.source && (
+                <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">
+                  Source: {item.source}
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mt-3 text-sm text-slate-500">{emptyLabel}</p>
+      )}
+    </div>
+  );
+}
+
+function ReportSection({ title, children, className = "" }) {
+  return (
+    <div className={`rounded-2xl border border-slate-200 bg-slate-50 p-5 ${className}`}>
       <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       <div className="mt-3 space-y-3 text-sm leading-6 text-slate-700">
         {children}
@@ -185,6 +339,44 @@ function getClinicalPriorityReason(patient) {
   return patient.admission?.reasoning || patient.risk?.reasoning || "Clinician review is recommended.";
 }
 
+function getAiModeTone(profile) {
+  if (profile?.llmApplied) {
+    return "green";
+  }
+
+  if (profile?.llmEligible) {
+    return "blue";
+  }
+
+  return "slate";
+}
+
+function getAiModeDescription(profile) {
+  if (profile?.llmApplied) {
+    return "This patient is in the top-priority cohort and includes LLM-assisted enrichment layered on top of the rule-based engine.";
+  }
+
+  if (profile?.llmEligible) {
+    return "This patient is in the top-priority cohort and is eligible for LLM enrichment when live or cached model output is available.";
+  }
+
+  return "This patient is currently using the rule-based intelligence engine. LLM enrichment is reserved for the top-priority cohort.";
+}
+
+function getConfidenceTone(confidence) {
+  const numericConfidence = Number(confidence || 0);
+
+  if (numericConfidence >= 80) {
+    return "green";
+  }
+
+  if (numericConfidence >= 60) {
+    return "orange";
+  }
+
+  return "red";
+}
+
 function buildNormalizedSummary(patient) {
   const diagnosisText = normalizeDisplayText(patient.clinical?.diagnosis);
   const notesText = normalizeDisplayText(patient.clinical?.clinicalNotes);
@@ -241,69 +433,109 @@ function buildNormalizedSummary(patient) {
   return ["Clinical source text is available below in the original form."];
 }
 
-function buildAiExplanation(patient, evidenceItems, clinicalSections) {
-  const combinedText = [
-    patient.risk?.reasoning,
-    patient.admission?.reasoning,
-    patient.admission?.summary,
-    patient.bed?.reasoning,
-    patient.traceability?.summary,
-    ...clinicalSections.map((section) => section.content),
-    ...evidenceItems.map(
-      (item) =>
-        `${item.category || ""} ${item.keyword || ""} ${item.source_section || ""} ${item.evidence_snippet || item.evidence || ""}`
-    ),
-  ]
-    .join(" ")
-    .toLowerCase();
+function buildPriorityInsights(patient, evidenceItems, clinicalIntelligence) {
+  const insights = [];
 
-  const explanationItems = [];
+  function pushInsight(title, explanation, source, evidence) {
+    if (!title || insights.some((item) => item.title === title)) {
+      return;
+    }
 
-  if (
-    evidenceItems.some((item) => String(item.category || "").toLowerCase().includes("emergency")) ||
-    /emergency|urgent|seizure|admit|admission|vomiting/.test(combinedText)
-  ) {
-    explanationItems.push(
-      "Emergency or high-acuity keywords were detected in the evidence trail and source notes."
+    insights.push({
+      title,
+      explanation,
+      source,
+      evidence,
+    });
+  }
+
+  const emergencyEvidence = evidenceItems.find((item) =>
+    String(item.category || "").toLowerCase().includes("emergency")
+  );
+  const renalEvidence = clinicalIntelligence?.comorbidities?.find((item) =>
+    /renal|kidney|nephro|creatinine|hyperkalemia/i.test(item.label)
+  );
+  const oncologyEvidence = clinicalIntelligence?.comorbidities?.find((item) =>
+    /lymphoma|oncology|transplant|myeloma/i.test(item.label)
+  );
+  const symptomEvidence = clinicalIntelligence?.possibleSymptoms?.[0];
+  const primaryCode = clinicalIntelligence?.primaryIcd10;
+
+  if (emergencyEvidence || patient.admission?.type === "Emergency") {
+    pushInsight(
+      "Acute escalation signal detected",
+      "Admission urgency increased because the source notes contain direct escalation or emergency language.",
+      emergencyEvidence?.source_section || emergencyEvidence?.source || "Admission reasoning",
+      emergencyEvidence?.evidence_snippet ||
+        emergencyEvidence?.evidence ||
+        patient.admission?.reasoning
     );
   }
 
-  if (/diabetes|renal|kidney|creat|creatinine|potassium|nephropathy/.test(combinedText)) {
-    explanationItems.push(
-      "Renal dysfunction, creatinine abnormalities, nephropathy, or metabolic abnormalities increase monitoring needs."
+  if (renalEvidence) {
+    pushInsight(
+      "Renal instability contributes to priority",
+      "Renal dysfunction, creatinine abnormalities, nephropathy, or metabolic derangement increase monitoring needs.",
+      renalEvidence.source,
+      renalEvidence.evidence
     );
   }
 
-  if (/oncology|lymphoma|transplant|biopsy|chemo|cancer/.test(combinedText)) {
-    explanationItems.push(
-      "Oncology, biopsy, or transplant-related context increases the complexity of the admission decision."
-    );
-  }
-
-  if (/creat|creatinine|potassium|seizure|bleed|hypotension|tachy/.test(combinedText)) {
-    explanationItems.push(
-      "Symptom severity and laboratory indicators suggest that closer observation may be required."
+  if (oncologyEvidence) {
+    pushInsight(
+      "Complex oncology / transplant context",
+      "Oncology, lymphoma, or transplant-related history raises admission complexity and the need for closer review.",
+      oncologyEvidence.source,
+      oncologyEvidence.evidence
     );
   }
 
   if (patient.journey?.progressionTrend === "Worsening") {
-    explanationItems.push(
-      "The patient journey shows worsening progression across visits, which raises priority."
+    pushInsight(
+      "Longitudinal deterioration detected",
+      "The patient journey shows worsening progression across visits, which increases operational priority.",
+      "Journey history",
+      patient.journey?.timelineSummary
     );
   }
 
-  if (patient.bed?.type === "ICU") {
-    explanationItems.push(
-      "The bed allocation engine recommends ICU-level support based on the detected acuity."
+  if (patient.bed?.type === "ICU" || patient.operational?.deferredTime?.label === "Cannot be safely delayed") {
+    pushInsight(
+      "Resource-intensive admission pathway",
+      "ICU-level support or unsafe-to-delay status indicates this case needs immediate operational coordination.",
+      "Bed allocation / deferred time",
+      patient.bed?.reasoning || patient.operational?.deferredTime?.reasoning
     );
   }
 
-  const uniqueExplanationItems = Array.from(new Set(explanationItems));
+  if (primaryCode) {
+    pushInsight(
+      "Structured clinical coding confidence",
+      `The extracted ICD-10 code ${primaryCode.code} (${primaryCode.label}) strengthens interpretability of the recommendation.`,
+      primaryCode.source,
+      primaryCode.evidence
+    );
+  }
 
-  return uniqueExplanationItems.length > 0
-    ? uniqueExplanationItems
+  if (insights.length < 4 && symptomEvidence) {
+    pushInsight(
+      "Symptom burden supports observation",
+      "The extracted symptom pattern contributes to why the AI recommends closer review or admission planning.",
+      symptomEvidence.source,
+      symptomEvidence.evidence
+    );
+  }
+
+  return insights.length > 0
+    ? insights
     : [
-        "The AI priority was derived from the combined risk score, admission reasoning, and traceable evidence in the source clinical text.",
+        {
+          title: "Combined clinical reasoning",
+          explanation:
+            "The AI priority was derived from the combined risk score, admission reasoning, and traceable evidence in the source clinical text.",
+          source: "AI operational summary",
+          evidence: patient.traceability?.summary || patient.risk?.reasoning,
+        },
       ];
 }
 
@@ -411,16 +643,6 @@ export default function PatientProfile() {
     [clinicalSections, noteSearch]
   );
 
-  const normalizedSummaryItems = useMemo(
-    () => (patient ? buildNormalizedSummary(patient) : []),
-    [patient]
-  );
-
-  const aiExplanationItems = useMemo(
-    () => (patient ? buildAiExplanation(patient, evidenceItems, clinicalSections) : []),
-    [clinicalSections, evidenceItems, patient]
-  );
-
   async function handleDownloadPdf() {
     if (!reportRef.current || !patient) {
       return;
@@ -514,6 +736,38 @@ export default function PatientProfile() {
   const clinicalPriorityReason = getClinicalPriorityReason(patient);
   const criticalPriorityAlert =
     patient.risk?.category === "Critical" && patient.admission?.type === "Elective";
+  const operational = patient.operational || {};
+  const intelligenceProfile = operational.intelligenceProfile || {};
+  const caseType = operational.caseType || {};
+  const packageIntelligence = operational.packageIntelligence || {};
+  const lengthOfStay = operational.lengthOfStay || {};
+  const readmissionRisk = operational.readmissionRisk || {};
+  const noShowRisk = operational.noShowRisk || {};
+  const deferredTime = operational.deferredTime || {};
+  const admissionConversionProbability =
+    operational.admissionConversionProbability || {};
+  const treatmentPlan = operational.treatmentPlan || {};
+  const clinicalTimeline = operational.clinicalTimeline || {};
+  const clinicalTimelineStages = clinicalTimeline.stages || [];
+  const clinicalIntelligence = operational.clinicalIntelligence || {};
+  const explicitConfidence = Number(patient.procedure?.explicitConfidence || 0);
+  const inferredConfidence = Number(patient.procedure?.inferredConfidence || 0);
+  const icd10Codes = clinicalIntelligence.icd10Codes || [];
+  const comorbidities = clinicalIntelligence.comorbidities || [];
+  const symptoms = clinicalIntelligence.possibleSymptoms || [];
+  const structuredHistory = clinicalIntelligence.structuredHistory || {};
+  const diseaseCohorts = clinicalIntelligence.diseaseCohorts || [];
+  const normalizedSummaryItems =
+    operational.normalizedSummary?.length > 0
+      ? operational.normalizedSummary
+      : buildNormalizedSummary(patient);
+  const priorityInsights =
+    operational.priorityInsights?.length > 0
+      ? operational.priorityInsights
+      : buildPriorityInsights(patient, evidenceItems, clinicalIntelligence);
+  const aiModeLabel = intelligenceProfile.primaryEngine || "Rule-based";
+  const aiModeTone = getAiModeTone(intelligenceProfile);
+  const aiModeDescription = getAiModeDescription(intelligenceProfile);
 
   return (
     <div className="min-h-screen p-6">
@@ -536,6 +790,17 @@ export default function PatientProfile() {
           </h1>
           <p className="mt-2 text-slate-600">
             {patient.department} | {patient.doctorName}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Badge tone={aiModeTone}>AI Mode: {aiModeLabel}</Badge>
+            {intelligenceProfile.priorityScore ? (
+              <Badge tone="orange">
+                Priority Score: {intelligenceProfile.priorityScore}
+              </Badge>
+            ) : null}
+          </div>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+            {aiModeDescription}
           </p>
         </div>
 
@@ -590,8 +855,12 @@ export default function PatientProfile() {
               <Badge tone="orange">{admissionTypeLabel}</Badge>
               <Badge tone="blue">{patient.bed?.type}</Badge>
               <Badge tone="green">{patient.validation?.status}</Badge>
+              <Badge tone={aiModeTone}>AI Mode: {aiModeLabel}</Badge>
             </div>
           </div>
+          <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-600">
+            {aiModeDescription}
+          </p>
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -602,6 +871,28 @@ export default function PatientProfile() {
               <DetailItem label="Department" value={patient.department} />
               <DetailItem label="Doctor" value={patient.doctorName} />
               <DetailItem label="Customer Type" value={patient.customerType} />
+              <DetailItem label="Case Type" value={caseType.label} />
+              <DetailItem label="AI Mode" value={aiModeLabel} />
+              <DetailItem
+                label="Priority Score"
+                value={
+                  intelligenceProfile.priorityScore
+                    ? String(intelligenceProfile.priorityScore)
+                    : "Not available"
+                }
+              />
+              <DetailItem
+                label="Primary Cohort"
+                value={clinicalIntelligence.primaryCohort}
+              />
+              <DetailItem
+                label="Primary ICD-10"
+                value={
+                  clinicalIntelligence.primaryIcd10
+                    ? `${clinicalIntelligence.primaryIcd10.code} ${clinicalIntelligence.primaryIcd10.label}`
+                    : "Not available"
+                }
+              />
               <DetailItem
                 label="Repeat Visit"
                 value={patient.journey?.repeatVisit || "Not available"}
@@ -610,16 +901,66 @@ export default function PatientProfile() {
           </ReportSection>
 
           <ReportSection title="Risk Summary">
-            <p>
-              <strong>Score:</strong> {patient.risk?.score}/10
-            </p>
-            <p>
-              <strong>Category:</strong> {patient.risk?.category}
-            </p>
+            <RiskGauge
+              score={patient.risk?.score}
+              category={patient.risk?.category}
+            />
+            <div className="pt-1">
+              <p>
+                <strong>Category:</strong> {patient.risk?.category}
+              </p>
+              <p className="mt-2">
+                <strong>Red Flags:</strong>{" "}
+                {patient.risk?.redFlags || "Not available"}
+              </p>
+            </div>
             <p>{patient.risk?.reasoning}</p>
-            <p>
-              <strong>Red Flags:</strong> {patient.risk?.redFlags || "Not available"}
-            </p>
+          </ReportSection>
+
+          <ReportSection title="Clinical Coding & Cohorts">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                ICD-10 Codes
+              </p>
+              <ChipList
+                items={icd10Codes}
+                emptyLabel="No structured coding match found."
+                tone="blue"
+              />
+            </div>
+            <div className="pt-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Disease Cohorts
+              </p>
+              <ChipList
+                items={diseaseCohorts}
+                emptyLabel="No disease cohort assigned."
+                tone="orange"
+              />
+            </div>
+          </ReportSection>
+
+          <ReportSection title="Comorbidities & Symptoms">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Comorbidities
+              </p>
+              <ChipList
+                items={comorbidities}
+                emptyLabel="No structured comorbidity extracted."
+                tone="red"
+              />
+            </div>
+            <div className="pt-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Possible Symptoms
+              </p>
+              <ChipList
+                items={symptoms}
+                emptyLabel="No symptom keywords extracted."
+                tone="green"
+              />
+            </div>
           </ReportSection>
 
           <ReportSection title="Admission Decision">
@@ -645,24 +986,104 @@ export default function PatientProfile() {
           </ReportSection>
 
           <ReportSection title="Procedure Intelligence">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <MetricCard
+                icon={BedDouble}
+                label="Explicit Procedure"
+                value={patient.procedure?.explicitProcedure}
+                hint={patient.procedure?.explicitSource || "No explicit source captured."}
+                tone="blue"
+              />
+              <MetricCard
+                icon={Search}
+                label="Inferred Procedure"
+                value={patient.procedure?.inferredProcedure}
+                hint={patient.procedure?.inferredSource || "No inferred source captured."}
+                tone="orange"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {explicitConfidence > 0 ? (
+                <Badge tone={getConfidenceTone(explicitConfidence)}>
+                  Explicit Confidence: {explicitConfidence}%
+                </Badge>
+              ) : null}
+              {inferredConfidence > 0 ? (
+                <Badge tone={getConfidenceTone(inferredConfidence)}>
+                  Inferred Confidence: {inferredConfidence}%
+                </Badge>
+              ) : null}
+              {explicitConfidence === 0 && inferredConfidence === 0 ? (
+                <Badge tone="slate">Confidence score not available</Badge>
+              ) : null}
+            </div>
+          </ReportSection>
+
+          <ReportSection title="Operational Forecast">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <MetricCard
+                icon={Coins}
+                label="Expected Revenue"
+                value={packageIntelligence.expectedRevenue}
+                hint={packageIntelligence.revenueCategory}
+                tone={
+                  ["High Value", "Strategic Value"].includes(
+                    packageIntelligence.revenueCategory
+                  )
+                    ? "purple"
+                    : "slate"
+                }
+              />
+              <MetricCard
+                icon={CalendarRange}
+                label="Estimated LOS"
+                value={lengthOfStay.label}
+                hint={lengthOfStay.reasoning}
+                tone="blue"
+              />
+              <MetricCard
+                icon={Repeat2}
+                label="Readmission Risk"
+                value={readmissionRisk.label}
+                hint={readmissionRisk.reasoning}
+                tone="orange"
+              />
+              <MetricCard
+                icon={Search}
+                label="No-show / Dropout Risk"
+                value={noShowRisk.label}
+                hint={noShowRisk.reasoning}
+                tone="slate"
+              />
+              <MetricCard
+                icon={TimerReset}
+                label="Deferred Time"
+                value={deferredTime.label}
+                hint={deferredTime.reasoning}
+                tone="red"
+              />
+              <MetricCard
+                icon={BadgePercent}
+                label="Admission Conversion"
+                value={
+                  admissionConversionProbability.percentage
+                    ? `${admissionConversionProbability.percentage}% (${admissionConversionProbability.label})`
+                    : "Not available"
+                }
+                hint={admissionConversionProbability.reasoning}
+                tone="green"
+              />
+            </div>
+          </ReportSection>
+
+          <ReportSection title="Treatment Planning">
             <p>
-              <strong>Explicit Procedure:</strong>{" "}
-              {patient.procedure?.explicitProcedure}
+              <strong>Primary Treatment:</strong> {treatmentPlan.primary}
             </p>
             <p>
-              <strong>Explicit Confidence:</strong>{" "}
-              {patient.procedure?.explicitConfidence}%
+              <strong>Secondary Treatment:</strong> {treatmentPlan.secondary}
             </p>
-            <p>
-              <strong>Explicit Source:</strong> {patient.procedure?.explicitSource}
-            </p>
-            <p>
-              <strong>Inferred Procedure:</strong>{" "}
-              {patient.procedure?.inferredProcedure}
-            </p>
-            <p>
-              <strong>Inference Source:</strong> {patient.procedure?.inferredSource}
-            </p>
+            <p>{treatmentPlan.reasoning}</p>
           </ReportSection>
 
           <ReportSection title="Validation Status">
@@ -724,11 +1145,90 @@ export default function PatientProfile() {
           </ReportSection>
 
           <ReportSection title="Why AI Gave This Priority">
-            <ul className="list-disc space-y-2 pl-5">
-              {aiExplanationItems.map((item) => (
-                <li key={item}>{item}</li>
+            <div className="space-y-3">
+              {priorityInsights.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <p className="font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-700">
+                    {item.explanation}
+                  </p>
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Source: {item.source}
+                  </p>
+                  <p className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+                    {item.evidence}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
+          </ReportSection>
+
+          <ReportSection title="Structured History" className="md:col-span-2">
+            <p>{structuredHistory.summary}</p>
+            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <HistoryGroup
+                title="Past Conditions"
+                items={structuredHistory.pastConditions}
+                emptyLabel="No past-condition summary extracted."
+              />
+              <HistoryGroup
+                title="Past Surgeries / Procedures"
+                items={structuredHistory.surgeries}
+                emptyLabel="No prior surgery signal extracted."
+              />
+              <HistoryGroup
+                title="Medication History"
+                items={structuredHistory.medications}
+                emptyLabel="No medication list parsed."
+              />
+              <HistoryGroup
+                title="Family History"
+                items={structuredHistory.familyHistory}
+                emptyLabel="No family history phrase extracted."
+              />
+            </div>
+          </ReportSection>
+
+          <ReportSection
+            title="Structured Clinical Timeline"
+            className="md:col-span-2"
+          >
+            <p>{clinicalTimeline.summary}</p>
+            <div className="mt-4 space-y-0">
+              {clinicalTimelineStages.map((stage, index) => (
+                <div
+                  key={`${stage.stage}-${stage.date}`}
+                  className="relative flex gap-4 pb-6 last:pb-0"
+                >
+                  <div className="flex w-10 flex-col items-center">
+                    <div className="z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 text-sm font-bold text-white">
+                      {index + 1}
+                    </div>
+                    {index < clinicalTimelineStages.length - 1 && (
+                      <div className="mt-2 h-full w-px bg-slate-300" />
+                    )}
+                  </div>
+
+                  <div className="flex-1 rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between">
+                      <p className="font-semibold text-slate-900">{stage.stage}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        {stage.date}
+                      </p>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      {stage.summary}
+                    </p>
+                    <p className="mt-2 text-xs uppercase tracking-wide text-slate-400">
+                      Source: {stage.source}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </ReportSection>
         </div>
       </div>
@@ -867,6 +1367,83 @@ export default function PatientProfile() {
             ) : (
               <p className="text-slate-500">No evidence available.</p>
             )}
+          </div>
+        </Panel>
+
+        <Panel title="Treatment Pathway">
+          <p className="text-sm leading-6 text-slate-700">
+            <strong>Primary Treatment:</strong> {treatmentPlan.primary}
+          </p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            <strong>Secondary Treatment:</strong> {treatmentPlan.secondary}
+          </p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            {treatmentPlan.reasoning}
+          </p>
+        </Panel>
+
+        <Panel title="Clinical Intelligence Snapshot" className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                ICD-10 Codes
+              </p>
+              <ChipList
+                items={icd10Codes}
+                emptyLabel="No structured coding match found."
+                tone="blue"
+              />
+              <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Disease Cohorts
+              </p>
+              <ChipList
+                items={diseaseCohorts}
+                emptyLabel="No disease cohort assigned."
+                tone="orange"
+              />
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Comorbidities
+              </p>
+              <ChipList
+                items={comorbidities}
+                emptyLabel="No structured comorbidity extracted."
+                tone="red"
+              />
+              <p className="mb-2 mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Possible Symptoms
+              </p>
+              <ChipList
+                items={symptoms}
+                emptyLabel="No symptom keywords extracted."
+                tone="green"
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <HistoryGroup
+              title="Past Conditions"
+              items={structuredHistory.pastConditions}
+              emptyLabel="No past-condition summary extracted."
+            />
+            <HistoryGroup
+              title="Past Surgeries / Procedures"
+              items={structuredHistory.surgeries}
+              emptyLabel="No prior surgery signal extracted."
+            />
+            <HistoryGroup
+              title="Medication History"
+              items={structuredHistory.medications}
+              emptyLabel="No medication list parsed."
+            />
+            <HistoryGroup
+              title="Family History"
+              items={structuredHistory.familyHistory}
+              emptyLabel="No family history phrase extracted."
+            />
           </div>
         </Panel>
       </div>

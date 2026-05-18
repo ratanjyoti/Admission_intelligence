@@ -1,0 +1,967 @@
+{
+  "BLKH.1370258": {
+    "fingerprint": "5107def3fcd46f6d605d88d213129009677c6233e74ac6a126aa5cbc8b5a1b40",
+    "payload": {
+      "clinicalIntelligence": {
+        "icd10Codes": [
+          {
+            "code": "N08.0",
+            "label": "Glomerulonephritis in diseases classified elsewhere",
+            "matchedKeyword": "IgA nephropathy",
+            "source": "Clinical Notes",
+            "evidence": "Diagnosis : Kidney (native)biopsy - Chronic sclerosing crescentic IgA nephropathy"
+          },
+          {
+            "code": "I10",
+            "label": "Essential (primary) hypertension",
+            "matchedKeyword": "HIGH BP",
+            "source": "Vital Remarks",
+            "evidence": "H/O VOMITINGS IN SEPTEMBER 2025 - FOUND TO HAVE HIGH BP- ANTRAL ULCER- H.P POSITIVE"
+          },
+          {
+            "code": "R56.9",
+            "label": "Seizure, unspecified",
+            "matchedKeyword": "SEIZURE EPISODE",
+            "source": "Vital Remarks",
+            "evidence": "?SEIZURE EPISODE 3 UNIT PRBC TRANSFUSED - NOV 25"
+          }
+        ],
+        "primaryIcd10": {
+          "code": "N08.0",
+          "label": "Glomerulonephritis in diseases classified elsewhere",
+          "matchedKeyword": "IgA nephropathy",
+          "source": "Clinical Notes",
+          "evidence": "Diagnosis : Kidney (native)biopsy - Chronic sclerosing crescentic IgA nephropathy"
+        },
+        "comorbidities": [
+          {
+            "label": "Hypertension",
+            "source": "Vital Remarks",
+            "evidence": "H/O VOMITINGS IN SEPTEMBER 2025 - FOUND TO HAVE HIGH BP- ANTRAL ULCER- H.P POSITIVE"
+          },
+          {
+            "label": "Chronic kidney disease",
+            "source": "Clinical Notes",
+            "evidence": "Total renal chronicity score is 7**( Moderate chronic changes)"
+          }
+        ],
+        "possibleSymptoms": [
+          {
+            "label": "Vomiting",
+            "source": "Vital Remarks",
+            "evidence": "H/O VOMITINGS IN SEPTEMBER 2025"
+          },
+          {
+            "label": "Seizure",
+            "source": "Vital Remarks",
+            "evidence": "?SEIZURE EPISODE 3 UNIT PRBC TRANSFUSED - NOV 25"
+          }
+        ],
+        "structuredHistory": {
+          "pastConditions": [
+            {
+              "label": "IgA nephropathy",
+              "source": "Clinical Notes",
+              "evidence": "Diagnosis : Kidney (native)biopsy - Chronic sclerosing crescentic IgA nephropathy"
+            }
+          ],
+          "surgeries": [],
+          "medications": [
+            {
+              "label": "Nicardia Retard 20mg",
+              "source": "Doctor Advice"
+            },
+            {
+              "label": "Metolar XL 25mg",
+              "source": "Doctor Advice"
+            }
+          ],
+          "familyHistory": [],
+          "summary": "Patient has a history of IgA nephropathy, hypertension, and chronic kidney disease, with symptoms including vomiting and seizure."
+        },
+        "diseaseCohorts": [
+          "Chronic kidney disease",
+          "Hypertension"
+        ],
+        "primaryCohort": "Chronic kidney disease"
+      },
+      "caseType": {
+        "label": "Emergency",
+        "reasoning": "Detected active emergency indicators in current clinical text"
+      },
+      "packageIntelligence": {
+        "expectedRevenue": "High",
+        "revenueCategory": "Critical Care",
+        "minLakhs": 5,
+        "maxLakhs": 10,
+        "midLakhs": 7.5,
+        "score": 8,
+        "drivers": [
+          "ICU admission",
+          "Dialysis procedure"
+        ],
+        "reasoning": "Patient requires ICU admission and dialysis procedure, indicating high revenue expectation"
+      },
+      "lengthOfStay": {
+        "label": "Prolonged",
+        "minDays": 7,
+        "maxDays": 14,
+        "drivers": [
+          "Chronic kidney disease",
+          "Hypertension"
+        ],
+        "reasoning": "Patient's chronic conditions and need for dialysis procedure indicate a prolonged length of stay"
+      },
+      "readmissionRisk": {
+        "label": "High",
+        "score": 0.8,
+        "drivers": [
+          "Chronic kidney disease",
+          "Hypertension"
+        ],
+        "reasoning": "Patient's chronic conditions and history of vomiting and seizure indicate a high risk of readmission"
+      },
+      "noShowRisk": {
+        "label": "Low",
+        "score": 0.2,
+        "drivers": [
+          "Emergency admission",
+          "ICU admission"
+        ],
+        "reasoning": "Patient's emergency admission and ICU admission indicate a low risk of no-show"
+      },
+      "deferredTime": {
+        "label": "Not applicable",
+        "drivers": [
+          "Emergency admission",
+          "ICU admission"
+        ],
+        "reasoning": "Patient's emergency admission and ICU admission indicate that deferred time is not applicable"
+      },
+      "admissionConversionProbability": {
+        "label": "High",
+        "percentage": 0.9,
+        "drivers": [
+          "Emergency admission",
+          "ICU admission"
+        ],
+        "reasoning": "Patient's emergency admission and ICU admission indicate a high probability of admission conversion"
+      },
+      "treatmentPlan": {
+        "primary": "Dialysis",
+        "secondary": "Medication management",
+        "reasoning": "Patient's chronic kidney disease and hypertension require dialysis and medication management"
+      },
+      "clinicalTimeline": {
+        "summary": "Patient was admitted to the ICU for dialysis and management of chronic kidney disease and hypertension",
+        "stages": [
+          {
+            "stage": "Admission",
+            "date": "2026-04-15",
+            "summary": "Patient was admitted to the ICU for dialysis and management of chronic kidney disease and hypertension",
+            "source": "Admission record"
+          },
+          {
+            "stage": "Dialysis",
+            "date": "2026-04-17",
+            "summary": "Patient underwent dialysis procedure",
+            "source": "Procedure record"
+          }
+        ]
+      },
+      "normalizedSummary": [
+        "Chronic kidney disease",
+        "Hypertension",
+        "IgA nephropathy"
+      ],
+      "priorityInsights": [
+        {
+          "title": "Chronic kidney disease management",
+          "explanation": "Patient requires ongoing management of chronic kidney disease, including dialysis and medication management",
+          "source": "Clinical Notes",
+          "evidence": "Total renal chronicity score is 7**( Moderate chronic changes)"
+        },
+        {
+          "title": "Hypertension management",
+          "explanation": "Patient requires ongoing management of hypertension, including medication management",
+          "source": "Vital Remarks",
+          "evidence": "H/O VOMITINGS IN SEPTEMBER 2025 - FOUND TO HAVE HIGH BP- ANTRAL ULCER- H.P POSITIVE"
+        }
+      ]
+    }
+  },
+  "BLKH.1077992": {
+    "fingerprint": "9cdc2abd76497ddefda5e3ecb913efec89d80a5388dc89efa6af86b3d60f4104",
+    "payload": {
+      "clinicalIntelligence": {
+        "icd10Codes": [
+          {
+            "code": "C83.3",
+            "label": "Marginal zone lymphoma",
+            "matchedKeyword": "Marginal Zone Lymphoma",
+            "source": "Diagnosis",
+            "evidence": "MARZINAL ZONE LYMPHOMA ON MAINTENANCE RITUXIMAB"
+          },
+          {
+            "code": "E11.9",
+            "label": "Type 2 diabetes mellitus without complications",
+            "matchedKeyword": "DM",
+            "source": "Diagnosis",
+            "evidence": "DM, NEPHROPATHY CHRONIC HBV CARRIER"
+          },
+          {
+            "code": "N18.9",
+            "label": "Chronic kidney disease, unspecified",
+            "matchedKeyword": "nephropathy",
+            "source": "Diagnosis",
+            "evidence": "DM, NEPHROPATHY CHRONIC HBV CARRIER"
+          }
+        ],
+        "primaryIcd10": {
+          "code": "C83.3",
+          "label": "Marginal zone lymphoma",
+          "matchedKeyword": "Marginal Zone Lymphoma",
+          "source": "Diagnosis",
+          "evidence": "MARZINAL ZONE LYMPHOMA ON MAINTENANCE RITUXIMAB"
+        },
+        "comorbidities": [
+          {
+            "label": "Diabetes",
+            "source": "Diagnosis",
+            "evidence": "DM, NEPHROPATHY CHRONIC HBV CARRIER"
+          },
+          {
+            "label": "Chronic kidney disease",
+            "source": "Diagnosis",
+            "evidence": "DM, NEPHROPATHY CHRONIC HBV CARRIER"
+          }
+        ],
+        "possibleSymptoms": [
+          {
+            "label": "Anemia",
+            "source": "Clinical Notes",
+            "evidence": "HB 12.10"
+          },
+          {
+            "label": "Vertigo",
+            "source": "Doctor Advice",
+            "evidence": "NEURO FOLLOWUP FOR VERTIGO"
+          }
+        ],
+        "structuredHistory": {
+          "pastConditions": [
+            {
+              "label": "Old meningeal TB",
+              "source": "Vital Remarks",
+              "evidence": "K/C/O DM ON TREATMENT- LINAGLIPTIN/ METFORMIN HE IS ALSO TAKING LEVERA (FOR OLD MENINGEAL TB IN 2018)"
+            }
+          ],
+          "surgeries": [],
+          "medications": [
+            {
+              "label": "Linagliptin",
+              "source": "Vital Remarks"
+            },
+            {
+              "label": "Metformin",
+              "source": "Vital Remarks"
+            },
+            {
+              "label": "Levera",
+              "source": "Vital Remarks"
+            }
+          ],
+          "familyHistory": [],
+          "summary": "Patient has marginal zone lymphoma, diabetes, and chronic kidney disease."
+        },
+        "diseaseCohorts": [
+          "Lymphoma"
+        ],
+        "primaryCohort": "Lymphoma"
+      },
+      "caseType": {
+        "label": "Elective",
+        "reasoning": "High-risk stable condition with planned admission pathway"
+      },
+      "packageIntelligence": {
+        "expectedRevenue": "High",
+        "revenueCategory": "Oncology",
+        "minLakhs": 5,
+        "maxLakhs": 10,
+        "midLakhs": 7.5,
+        "score": 8,
+        "drivers": [
+          "Bone Marrow Transplant"
+        ],
+        "reasoning": "High-risk stable condition with planned admission pathway and bone marrow transplant procedure"
+      },
+      "lengthOfStay": {
+        "label": "Medium",
+        "minDays": 7,
+        "maxDays": 14,
+        "drivers": [
+          "Bone Marrow Transplant",
+          "Chronic kidney disease"
+        ],
+        "reasoning": "Medium length of stay due to bone marrow transplant procedure and chronic kidney disease"
+      },
+      "readmissionRisk": {
+        "label": "High",
+        "score": 8,
+        "drivers": [
+          "Lymphoma",
+          "Chronic kidney disease"
+        ],
+        "reasoning": "High readmission risk due to lymphoma and chronic kidney disease"
+      },
+      "noShowRisk": {
+        "label": "Low",
+        "score": 2,
+        "drivers": [],
+        "reasoning": "Low no-show risk as patient is already admitted"
+      },
+      "deferredTime": {
+        "label": "Not Applicable",
+        "drivers": [],
+        "reasoning": "Not applicable as patient is already admitted"
+      },
+      "admissionConversionProbability": {
+        "label": "High",
+        "percentage": 90,
+        "drivers": [
+          "Elective admission"
+        ],
+        "reasoning": "High admission conversion probability due to elective admission"
+      },
+      "treatmentPlan": {
+        "primary": "Bone Marrow Transplant",
+        "secondary": "Rituximab maintenance",
+        "reasoning": "Primary treatment plan is bone marrow transplant and secondary plan is rituximab maintenance"
+      },
+      "clinicalTimeline": {
+        "summary": "Patient has marginal zone lymphoma, diabetes, and chronic kidney disease. Patient is planned for bone marrow transplant.",
+        "stages": [
+          {
+            "stage": "Diagnosis",
+            "date": "2026-03-20",
+            "summary": "Patient diagnosed with marginal zone lymphoma",
+            "source": "Diagnosis"
+          },
+          {
+            "stage": "Bone Marrow Transplant",
+            "date": "2026-03-20",
+            "summary": "Patient planned for bone marrow transplant",
+            "source": "Procedure"
+          }
+        ]
+      },
+      "normalizedSummary": [
+        "Marginal zone lymphoma",
+        "Diabetes",
+        "Chronic kidney disease"
+      ],
+      "priorityInsights": [
+        {
+          "title": "Lymphoma Diagnosis",
+          "explanation": "Patient diagnosed with marginal zone lymphoma",
+          "source": "Diagnosis",
+          "evidence": "MARZINAL ZONE LYMPHOMA ON MAINTENANCE RITUXIMAB"
+        },
+        {
+          "title": "Bone Marrow Transplant Planned",
+          "explanation": "Patient planned for bone marrow transplant",
+          "source": "Procedure",
+          "evidence": "Bone Marrow Transplant"
+        }
+      ]
+    }
+  },
+  "BLKH.1045485": {
+    "fingerprint": "c750075da41c9b0d3968837c0e5aa03d7caed2455b710b8a4ae48bf853ac148f",
+    "payload": {
+      "clinicalIntelligence": {
+        "icd10Codes": [
+          {
+            "code": "I10",
+            "label": "Essential hypertension",
+            "matchedKeyword": "hypertension",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          },
+          {
+            "code": "I49.5",
+            "label": "Complete heart block",
+            "matchedKeyword": "heart block",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          },
+          {
+            "code": "G47.33",
+            "label": "Obstructive sleep apnea",
+            "matchedKeyword": "osa",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          },
+          {
+            "code": "T86.1",
+            "label": "Kidney transplant rejection",
+            "matchedKeyword": "post lrrt",
+            "source": "Vital Remarks / History",
+            "evidence": "post lrrt- 17/1/26 - nadir creat-0.86 - donor - wife - b"
+          }
+        ],
+        "primaryIcd10": {
+          "code": "T86.1",
+          "label": "Kidney transplant rejection",
+          "matchedKeyword": "post lrrt",
+          "source": "Vital Remarks / History",
+          "evidence": "post lrrt- 17/1/26 - nadir creat-0.86 - donor - wife - b"
+        },
+        "comorbidities": [
+          {
+            "label": "Hypertension",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          },
+          {
+            "label": "Complete heart block",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          },
+          {
+            "label": "Obstructive sleep apnea",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up : - hypertension - complete heart block - post ppi 24th december 2024 - osa"
+          }
+        ],
+        "possibleSymptoms": [
+          {
+            "label": "Residual urine output",
+            "source": "Vital Remarks / History",
+            "evidence": "residual urine output 600 ml"
+          }
+        ],
+        "structuredHistory": {
+          "pastConditions": [
+            {
+              "label": "Post PPI",
+              "source": "Vital Remarks / History",
+              "evidence": "post ppi 24th december 2024"
+            },
+            {
+              "label": "Living Related Renal Transplant",
+              "source": "Vital Remarks / History",
+              "evidence": "post lrrt- 17/1/26 - nadir creat-0.86 - donor - wife - b"
+            }
+          ],
+          "surgeries": [
+            {
+              "label": "Living Related Renal Transplant",
+              "source": "Vital Remarks / History",
+              "evidence": "post lrrt- 17/1/26 - nadir creat-0.86 - donor - wife - b"
+            }
+          ],
+          "medications": [
+            {
+              "label": "Tacrolimus",
+              "source": "Clinical Notes"
+            }
+          ],
+          "familyHistory": [],
+          "summary": "Patient has a history of hypertension, complete heart block, and obstructive sleep apnea. Patient had a living related renal transplant and is on tacrolimus."
+        },
+        "diseaseCohorts": [
+          "Chronic kidney disease",
+          "Hypertension",
+          "Obstructive sleep apnea"
+        ],
+        "primaryCohort": "Chronic kidney disease"
+      },
+      "caseType": {
+        "label": "Elective",
+        "reasoning": "High-risk stable condition with planned admission pathway"
+      },
+      "packageIntelligence": {
+        "expectedRevenue": "High",
+        "revenueCategory": "Elective",
+        "minLakhs": 5,
+        "maxLakhs": 10,
+        "midLakhs": 7.5,
+        "score": 8,
+        "drivers": [
+          "Complexity of procedure",
+          "Length of stay"
+        ],
+        "reasoning": "The expected revenue is high due to the complexity of the procedure and the length of stay."
+      },
+      "lengthOfStay": {
+        "label": "Medium",
+        "minDays": 7,
+        "maxDays": 14,
+        "drivers": [
+          "Type of procedure",
+          "Patient's condition"
+        ],
+        "reasoning": "The length of stay is medium due to the type of procedure and the patient's condition."
+      },
+      "readmissionRisk": {
+        "label": "High",
+        "score": 8,
+        "drivers": [
+          "Complexity of procedure",
+          "Patient's condition"
+        ],
+        "reasoning": "The readmission risk is high due to the complexity of the procedure and the patient's condition."
+      },
+      "noShowRisk": {
+        "label": "Low",
+        "score": 2,
+        "drivers": [
+          "Patient's engagement",
+          "Follow-up appointments"
+        ],
+        "reasoning": "The no-show risk is low due to the patient's engagement and follow-up appointments."
+      },
+      "deferredTime": {
+        "label": "Not applicable",
+        "drivers": [],
+        "reasoning": "The procedure cannot be deferred due to the patient's condition."
+      },
+      "admissionConversionProbability": {
+        "label": "High",
+        "percentage": 80,
+        "drivers": [
+          "Urgency of procedure",
+          "Patient's condition"
+        ],
+        "reasoning": "The admission conversion probability is high due to the urgency of the procedure and the patient's condition."
+      },
+      "treatmentPlan": {
+        "primary": "Living Related Renal Transplant",
+        "secondary": "Tacrolimus therapy",
+        "reasoning": "The primary treatment plan is a living related renal transplant, and the secondary treatment plan is tacrolimus therapy."
+      },
+      "clinicalTimeline": {
+        "summary": "The patient had a living related renal transplant and is on tacrolimus therapy.",
+        "stages": [
+          {
+            "stage": "Pre-transplant",
+            "date": "2026-01-17",
+            "summary": "The patient had a living related renal transplant.",
+            "source": "Vital Remarks / History"
+          },
+          {
+            "stage": "Post-transplant",
+            "date": "2026-04-04",
+            "summary": "The patient is on tacrolimus therapy.",
+            "source": "Clinical Notes"
+          }
+        ]
+      },
+      "normalizedSummary": [
+        "The patient has a history of hypertension, complete heart block, and obstructive sleep apnea.",
+        "The patient had a living related renal transplant and is on tacrolimus therapy."
+      ],
+      "priorityInsights": [
+        {
+          "title": "High readmission risk",
+          "explanation": "The patient has a high readmission risk due to the complexity of the procedure and the patient's condition.",
+          "source": "Readmission risk assessment",
+          "evidence": "The readmission risk score is 8."
+        },
+        {
+          "title": "Importance of follow-up appointments",
+          "explanation": "The patient's engagement and follow-up appointments are crucial to prevent no-shows and ensure proper care.",
+          "source": "No-show risk assessment",
+          "evidence": "The no-show risk score is 2."
+        }
+      ]
+    }
+  },
+  "EHPG.856045": {
+    "fingerprint": "395778780edfe215ee46fe94e60ec719501422834e26f832777895a6b80f0913",
+    "payload": {
+      "clinicalIntelligence": {
+        "icd10Codes": [
+          {
+            "code": "N18.9",
+            "label": "Chronic kidney disease, unspecified",
+            "matchedKeyword": "kidney disease",
+            "source": "Clinical Notes",
+            "evidence": "25.3, psa 2.05 ncct kub rk 10.1cm, lk 9.9cm, mild b/l peri renal fat stranding, no calculus or hydronephrosis"
+          },
+          {
+            "code": "E11.9",
+            "label": "Type 2 diabetes mellitus without complications",
+            "matchedKeyword": "type 2 diabetes mellitus",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up case of : - type 2 diabetes mellitus - hypertension - l5-s1 tlif - h/o b/l tkr (2023) -"
+          },
+          {
+            "code": "I10",
+            "label": "Essential (primary) hypertension",
+            "matchedKeyword": "hypertension",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up case of : - type 2 diabetes mellitus - hypertension - l5-s1 tlif - h/o b/l tkr (2023) -"
+          }
+        ],
+        "primaryIcd10": {
+          "code": "N18.9",
+          "label": "Chronic kidney disease, unspecified",
+          "matchedKeyword": "kidney disease",
+          "source": "Clinical Notes",
+          "evidence": "25.3, psa 2.05 ncct kub rk 10.1cm, lk 9.9cm, mild b/l peri renal fat stranding, no calculus or hydronephrosis"
+        },
+        "comorbidities": [
+          {
+            "label": "Type 2 diabetes mellitus",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up case of : - type 2 diabetes mellitus - hypertension - l5-s1 tlif - h/o b/l tkr (2023) -"
+          },
+          {
+            "label": "Hypertension",
+            "source": "Vital Remarks / History",
+            "evidence": "follow up case of : - type 2 diabetes mellitus - hypertension - l5-s1 tlif - h/o b/l tkr (2023) -"
+          }
+        ],
+        "possibleSymptoms": [
+          {
+            "label": "Pedal edema",
+            "source": "Physical Remarks",
+            "evidence": "PEDAL EDEMA++"
+          }
+        ],
+        "structuredHistory": {
+          "pastConditions": [
+            {
+              "label": "Urosepsis",
+              "source": "Vital Remarks / History",
+              "evidence": "HISTORY OF ADMISSION FOR UROSEPSIS WITH FLUID OVERLOAD TWICE IN LAST 2 MONTHS"
+            }
+          ],
+          "surgeries": [
+            {
+              "label": "L5-S1 TLIF",
+              "source": "Vital Remarks / History",
+              "evidence": "L5-S1 TLIF"
+            },
+            {
+              "label": "Laminectomy + discectomy",
+              "source": "Vital Remarks / History",
+              "evidence": "S/P LAMINECTOMY + DISCECTOMY (JUNE 2025)"
+            }
+          ],
+          "medications": [
+            {
+              "label": "Cefepime",
+              "source": "Vital Remarks / History",
+              "evidence": "RECEIVED CEFEPIME + ENMETAZOBACTUM"
+            },
+            {
+              "label": "Meropenem",
+              "source": "Vital Remarks / History",
+              "evidence": "RECEIVED MEROPENEM"
+            }
+          ],
+          "familyHistory": [],
+          "summary": "Patient has a history of urosepsis, type 2 diabetes mellitus, hypertension, and chronic kidney disease."
+        },
+        "diseaseCohorts": [
+          "Chronic Kidney Disease",
+          "Type 2 Diabetes Mellitus",
+          "Hypertension"
+        ],
+        "primaryCohort": "Chronic Kidney Disease"
+      },
+      "caseType": {
+        "label": "Emergency",
+        "reasoning": "Detected active emergency indicators in current clinical text"
+      },
+      "packageIntelligence": {
+        "expectedRevenue": "High",
+        "revenueCategory": "Critical Care",
+        "minLakhs": 5,
+        "maxLakhs": 10,
+        "midLakhs": 7.5,
+        "score": 8,
+        "drivers": [
+          "ICU admission",
+          "Complex medical condition",
+          "Multiple comorbidities"
+        ],
+        "reasoning": "Patient requires critical care and has multiple comorbidities, resulting in high expected revenue."
+      },
+      "lengthOfStay": {
+        "label": "Prolonged",
+        "minDays": 7,
+        "maxDays": 14,
+        "drivers": [
+          "Complex medical condition",
+          "Multiple comorbidities",
+          "ICU admission"
+        ],
+        "reasoning": "Patient's condition and comorbidities require prolonged hospital stay."
+      },
+      "readmissionRisk": {
+        "label": "High",
+        "score": 0.8,
+        "drivers": [
+          "Chronic kidney disease",
+          "Type 2 diabetes mellitus",
+          "Hypertension"
+        ],
+        "reasoning": "Patient's chronic conditions increase the risk of readmission."
+      },
+      "noShowRisk": {
+        "label": "Low",
+        "score": 0.2,
+        "drivers": [
+          "Emergency admission",
+          "Critical condition"
+        ],
+        "reasoning": "Patient's critical condition and emergency admission reduce the risk of no-show."
+      },
+      "deferredTime": {
+        "label": "Not applicable",
+        "drivers": [
+          "Emergency admission",
+          "Critical condition"
+        ],
+        "reasoning": "Patient's critical condition and emergency admission require immediate attention."
+      },
+      "admissionConversionProbability": {
+        "label": "High",
+        "percentage": 0.9,
+        "drivers": [
+          "Emergency admission",
+          "Critical condition"
+        ],
+        "reasoning": "Patient's critical condition and emergency admission increase the likelihood of admission conversion."
+      },
+      "treatmentPlan": {
+        "primary": "Nephrology consultation and management",
+        "secondary": "Infectious disease consultation and management",
+        "reasoning": "Patient's chronic kidney disease and urosepsis require specialized care."
+      },
+      "clinicalTimeline": {
+        "summary": "Patient was admitted on 2026-03-28 with a risk score of 10 and critical condition.",
+        "stages": [
+          {
+            "stage": "Admission",
+            "date": "2026-03-28",
+            "summary": "Patient was admitted with a risk score of 10 and critical condition.",
+            "source": "Admission record"
+          },
+          {
+            "stage": "ICU admission",
+            "date": "2026-03-28",
+            "summary": "Patient was admitted to ICU due to critical condition.",
+            "source": "Bed allocation record"
+          }
+        ]
+      },
+      "normalizedSummary": [
+        "Chronic kidney disease",
+        "Type 2 diabetes mellitus",
+        "Hypertension",
+        "Urosepsis"
+      ],
+      "priorityInsights": [
+        {
+          "title": "Chronic kidney disease management",
+          "explanation": "Patient requires ongoing management of chronic kidney disease to prevent progression.",
+          "source": "Clinical Notes",
+          "evidence": "25.3, psa 2.05 ncct kub rk 10.1cm, lk 9.9cm, mild b/l peri renal fat stranding, no calculus or hydronephrosis"
+        },
+        {
+          "title": "Infection control",
+          "explanation": "Patient is at risk of infection due to urosepsis and requires close monitoring.",
+          "source": "Vital Remarks / History",
+          "evidence": "HISTORY OF ADMISSION FOR UROSEPSIS WITH FLUID OVERLOAD TWICE IN LAST 2 MONTHS"
+        }
+      ]
+    }
+  },
+  "INTAKE-20260518153306-98B6BA": {
+    "fingerprint": "b3ca781c25d9b890c7572e2962e4be4dd3a4e65f4be5baa62108f3764cf4114c",
+    "payload": {
+      "clinicalIntelligence": {
+        "icd10Codes": [
+          {
+            "code": "R07.1",
+            "label": "Chest pain on breathing",
+            "matchedKeyword": "Chest pain",
+            "source": "clinicalNotes",
+            "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+          },
+          {
+            "code": "E11.9",
+            "label": "Type 2 diabetes mellitus without complications",
+            "matchedKeyword": "diabetes",
+            "source": "clinicalNotes",
+            "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+          },
+          {
+            "code": "N18.3",
+            "label": "Chronic kidney disease, stage 3 (moderate)",
+            "matchedKeyword": "renal dysfunction",
+            "source": "clinicalNotes",
+            "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+          }
+        ],
+        "primaryIcd10": {
+          "code": "R07.1",
+          "label": "Chest pain on breathing",
+          "matchedKeyword": "Chest pain",
+          "source": "clinicalNotes",
+          "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+        },
+        "comorbidities": [
+          {
+            "label": "Diabetes mellitus",
+            "source": "vitalRemarks",
+            "evidence": "Known diabetes mellitus and hypertension with repeat visit history."
+          },
+          {
+            "label": "Hypertension",
+            "source": "vitalRemarks",
+            "evidence": "Known diabetes mellitus and hypertension with repeat visit history."
+          }
+        ],
+        "possibleSymptoms": [
+          {
+            "label": "Chest pain",
+            "source": "clinicalNotes",
+            "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+          },
+          {
+            "label": "Breathlessness",
+            "source": "clinicalNotes",
+            "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+          }
+        ],
+        "structuredHistory": {
+          "pastConditions": [
+            {
+              "label": "Diabetes history",
+              "source": "clinicalNotes",
+              "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+            },
+            {
+              "label": "Renal dysfunction",
+              "source": "clinicalNotes",
+              "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+            }
+          ],
+          "surgeries": [],
+          "medications": [],
+          "familyHistory": [],
+          "summary": "Patient has a history of diabetes and renal dysfunction, and is experiencing chest pain and breathlessness."
+        },
+        "diseaseCohorts": [
+          "Cardiovascular disease"
+        ],
+        "primaryCohort": "Cardiovascular disease"
+      },
+      "caseType": {
+        "label": "Elective",
+        "reasoning": "Predictive model favors an Elective pathway with admission-likelihood signal around 19%."
+      },
+      "packageIntelligence": {
+        "expectedRevenue": "Medium",
+        "revenueCategory": "Cardiology",
+        "minLakhs": 2.5,
+        "maxLakhs": 5.0,
+        "midLakhs": 3.75,
+        "score": 0.6,
+        "drivers": [
+          "Cardiology department",
+          "Elective admission"
+        ],
+        "reasoning": "Revenue estimate based on department and admission type."
+      },
+      "lengthOfStay": {
+        "label": "Medium",
+        "minDays": 3,
+        "maxDays": 7,
+        "drivers": [
+          "Cardiology department",
+          "Elective admission"
+        ],
+        "reasoning": "Length of stay estimate based on department and admission type."
+      },
+      "readmissionRisk": {
+        "label": "Medium",
+        "score": 0.5,
+        "drivers": [
+          "Cardiology department",
+          "Elective admission"
+        ],
+        "reasoning": "Readmission risk estimate based on department and admission type."
+      },
+      "noShowRisk": {
+        "label": "Low",
+        "score": 0.2,
+        "drivers": [
+          "Elective admission"
+        ],
+        "reasoning": "No-show risk estimate based on admission type."
+      },
+      "deferredTime": {
+        "label": "Not applicable",
+        "drivers": [],
+        "reasoning": "Deferred time not applicable for elective admissions."
+      },
+      "admissionConversionProbability": {
+        "label": "Low",
+        "percentage": 19,
+        "drivers": [
+          "Elective admission"
+        ],
+        "reasoning": "Admission conversion probability estimate based on predictive model."
+      },
+      "treatmentPlan": {
+        "primary": "Urgent review and monitored admission",
+        "secondary": "Further evaluation and management of chest pain and renal dysfunction",
+        "reasoning": "Treatment plan based on clinical notes and doctor advice."
+      },
+      "clinicalTimeline": {
+        "summary": "Patient to undergo urgent review and monitored admission for chest pain and renal dysfunction.",
+        "stages": [
+          {
+            "stage": "Urgent review",
+            "date": "2026-05-18",
+            "summary": "Patient to undergo urgent review for chest pain and renal dysfunction.",
+            "source": "doctorAdvice"
+          },
+          {
+            "stage": "Monitored admission",
+            "date": "2026-05-18",
+            "summary": "Patient to be admitted for monitored admission and further evaluation.",
+            "source": "doctorAdvice"
+          }
+        ]
+      },
+      "normalizedSummary": [
+        "Chest pain",
+        "Diabetes history",
+        "Renal dysfunction",
+        "Elective admission"
+      ],
+      "priorityInsights": [
+        {
+          "title": "Chest pain management",
+          "explanation": "Patient is experiencing chest pain and requires urgent review and monitored admission.",
+          "source": "clinicalNotes",
+          "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+        },
+        {
+          "title": "Renal dysfunction management",
+          "explanation": "Patient has a history of renal dysfunction and requires further evaluation and management.",
+          "source": "clinicalNotes",
+          "evidence": "Patient reports acute chest pain, breathlessness, diabetes history, and renal dysfunction."
+        }
+      ]
+    }
+  }
+}

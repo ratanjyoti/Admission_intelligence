@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, BedDouble, Building2, Siren, Stethoscope } from "lucide-react";
 import {
   Bar,
@@ -15,9 +15,13 @@ import ErrorState from "../components/ErrorState";
 import LoadingScreen from "../components/LoadingScreen";
 import { getDashboardCharts, getDashboardSummary } from "../lib/api";
 
-function SummaryCard({ title, value, icon: Icon, tone }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+function SummaryCard({ title, value, icon: Icon, tone, onClick }) {
+  const className = `metric-card rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm ${
+    onClick ? "clickable" : ""
+  }`;
+
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
@@ -27,6 +31,33 @@ function SummaryCard({ title, value, icon: Icon, tone }) {
           <Icon className="h-6 w-6" />
         </div>
       </div>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {content}
+      </button>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
+}
+
+function AnalyticsTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-lg">
+      <p className="font-semibold text-slate-900">{label}</p>
+      {payload.map((entry) => (
+        <p key={`${entry.dataKey}-${entry.name}`} className="mt-1 text-slate-600">
+          {entry.name || entry.dataKey}: {entry.value}
+        </p>
+      ))}
     </div>
   );
 }
@@ -57,6 +88,12 @@ function DepartmentMetricChart({ title, description, data, dataKey, color }) {
             layout="vertical"
             margin={{ top: 8, right: 24, left: 8, bottom: 8 }}
           >
+            <defs>
+              <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor={color} stopOpacity={0.95} />
+                <stop offset="100%" stopColor={color} stopOpacity={0.55} />
+              </linearGradient>
+            </defs>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" allowDecimals={false} />
             <YAxis
@@ -65,8 +102,13 @@ function DepartmentMetricChart({ title, description, data, dataKey, color }) {
               width={180}
               tick={{ fontSize: 12 }}
             />
-            <Tooltip />
-            <Bar dataKey={dataKey} fill={color} radius={[0, 10, 10, 0]} />
+            <Tooltip content={<AnalyticsTooltip />} />
+            <Bar
+              dataKey={dataKey}
+              fill={`url(#gradient-${dataKey})`}
+              radius={[0, 10, 10, 0]}
+              animationDuration={900}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -75,6 +117,7 @@ function DepartmentMetricChart({ title, description, data, dataKey, color }) {
 }
 
 export default function DepartmentAnalytics() {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [departmentMetrics, setDepartmentMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,24 +242,40 @@ export default function DepartmentAnalytics() {
           value={summary?.departmentCount ?? departmentMetrics.length}
           icon={Building2}
           tone="bg-slate-100 text-slate-700"
+          onClick={() => navigate("/dashboard")}
         />
         <SummaryCard
           title="Critical Hotspots"
           value={departmentsWithCriticalPatients}
           icon={Stethoscope}
           tone="bg-red-100 text-red-700"
+          onClick={() => navigate("/dashboard?risk=Critical")}
         />
         <SummaryCard
           title="Peak ICU Demand"
           value={`${peakIcuDemand.department} (${peakIcuDemand.icuDemand})`}
           icon={BedDouble}
           tone="bg-blue-100 text-blue-700"
+          onClick={() =>
+            navigate(
+              `/dashboard?department=${encodeURIComponent(
+                peakIcuDemand.department
+              )}&bed=ICU`
+            )
+          }
         />
         <SummaryCard
           title="Peak Emergency Load"
           value={`${peakEmergencyAdmissions.department} (${peakEmergencyAdmissions.emergencyAdmissions})`}
           icon={Siren}
           tone="bg-orange-100 text-orange-700"
+          onClick={() =>
+            navigate(
+              `/dashboard?department=${encodeURIComponent(
+                peakEmergencyAdmissions.department
+              )}&admission=Emergency`
+            )
+          }
         />
       </div>
 

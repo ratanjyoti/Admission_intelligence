@@ -6,6 +6,8 @@ import LoadingScreen from "./components/LoadingScreen";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const DepartmentAnalytics = lazy(() => import("./pages/DepartmentAnalytics"));
 const PatientProfile = lazy(() => import("./pages/PatientProfile"));
+const Architecture = lazy(() => import("./pages/Architecture"));
+const NewPatientIntake = lazy(() => import("./pages/NewPatientIntake"));
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/analytics/departments" element={<DepartmentAnalytics />} />
+            <Route path="/architecture" element={<Architecture />} />
+            <Route path="/intake/new-patient" element={<NewPatientIntake />} />
             <Route path="/patient/:id" element={<PatientProfile />} />
           </Routes>
         </Suspense>

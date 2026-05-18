@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Activity, BarChart3, LayoutDashboard, Stethoscope } from "lucide-react";
+import {
+  Activity,
+  BarChart3,
+  ClipboardPlus,
+  Cpu,
+  LayoutDashboard,
+  Stethoscope,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { getApiHealth } from "../lib/api";
 
@@ -127,6 +134,14 @@ export default function Navbar() {
             <NavLink to="/analytics/departments" className={navLinkClassName}>
               <BarChart3 className="h-4 w-4" />
               Department Analytics
+            </NavLink>
+            <NavLink to="/architecture" className={navLinkClassName}>
+              <Cpu className="h-4 w-4" />
+              AI Architecture
+            </NavLink>
+            <NavLink to="/intake/new-patient" className={navLinkClassName}>
+              <ClipboardPlus className="h-4 w-4" />
+              New Patient Intake
             </NavLink>
           </nav>
         </div>
