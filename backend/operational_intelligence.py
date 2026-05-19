@@ -1,9 +1,12 @@
 import ast
 import copy
+import os
 import re
 from datetime import datetime
 from urllib.parse import unquote
 
+from backend.agentic.mapper import safe_merge_agentic_into_operational
+from backend.agentic.orchestrator import run_agentic_patient_pipeline
 from backend.llm_intelligence import (
     maybe_generate_llm_operational,
     merge_operational_payloads,
@@ -21,6 +24,10 @@ PRIORITY_DEFERRED_POINTS = {
 }
 PRIORITY_RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 PRIORITY_ADMISSION_ORDER = {"Emergency": 0, "Urgent": 1, "Elective": 2}
+
+
+def should_use_agentic_risk():
+    return os.getenv("AGENTIC_RISK_ENABLED", "false").strip().lower() == "true"
 
 
 MAJOR_PROCEDURE_KEYWORDS = [
@@ -1395,12 +1402,35 @@ def derive_operational_intelligence(
     )
 
     merged_payload = merge_operational_payloads(base_payload, llm_payload)
+    merged_payload["risk_source"] = "fallback_ml_rules"
     merged_payload["predictiveModeling"] = predictive_modeling
+
+    if should_use_agentic_risk():
+        try:
+            agentic_result = run_agentic_patient_pipeline(
+                patient,
+                baseline_operational=merged_payload,
+            )
+            merged_payload = safe_merge_agentic_into_operational(
+                merged_payload,
+                agentic_result,
+            )
+        except Exception as exc:
+            merged_payload["agentic_error"] = str(exc)
+            merged_payload["risk_source"] = "fallback_ml_rules"
+
+    agentic_applied = str(merged_payload.get("risk_source") or "").startswith("agentic_llm")
     merged_payload["intelligenceProfile"] = {
         "llmEligible": llm_allowed,
         "llmApplied": bool(llm_payload),
+        "agenticEnabled": should_use_agentic_risk(),
+        "agenticApplied": agentic_applied,
         "primaryEngine": (
-            "ML + LLM + Rule-based"
+            "Agentic LLM + ML + Rule-based"
+            if agentic_applied and predictive_modeling.get("enabled")
+            else "Agentic LLM + Rule-based"
+            if agentic_applied
+            else "ML + LLM + Rule-based"
             if predictive_modeling.get("enabled") and llm_payload
             else "ML + Rule-based"
             if predictive_modeling.get("enabled")

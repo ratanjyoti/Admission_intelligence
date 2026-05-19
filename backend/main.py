@@ -1,4 +1,5 @@
-from typing import Optional
+import os
+from typing import Any, Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,10 @@ from backend.data_service import (
     load_live_patients,
     load_patients,
     load_raw_patients,
+)
+from backend.agentic.orchestrator import (
+    AGENTIC_WORKFLOW_VERSION,
+    run_agentic_patient_pipeline,
 )
 from backend.database import Base, database_connected, database_enabled, engine
 from backend.llm_intelligence import (
@@ -105,6 +110,10 @@ def health_check():
         "ml_models_ready": ml_models_ready(),
         "ml_model_version": ml_metadata.get("model_version"),
         "live_patients_loaded": len(load_live_patients()),
+        "agentic_risk_enabled": os.getenv("AGENTIC_RISK_ENABLED", "false").lower() == "true",
+        "agentic_provider": os.getenv("AGENTIC_PROVIDER", "groq"),
+        "agentic_model": os.getenv("AGENTIC_MODEL", "llama-3.3-70b-versatile"),
+        "agentic_workflow_version": os.getenv("AGENTIC_WORKFLOW_VERSION", AGENTIC_WORKFLOW_VERSION),
     }
 
 
@@ -125,6 +134,10 @@ def api_health_check():
         "ml_models_ready": ml_models_ready(),
         "ml_model_version": ml_metadata.get("model_version"),
         "live_patients_loaded": len(load_live_patients()),
+        "agentic_risk_enabled": os.getenv("AGENTIC_RISK_ENABLED", "false").lower() == "true",
+        "agentic_provider": os.getenv("AGENTIC_PROVIDER", "groq"),
+        "agentic_model": os.getenv("AGENTIC_MODEL", "llama-3.3-70b-versatile"),
+        "agentic_workflow_version": os.getenv("AGENTIC_WORKFLOW_VERSION", AGENTIC_WORKFLOW_VERSION),
     }
 
 
@@ -167,6 +180,11 @@ def predict_patient(payload: IntakePatientPayload):
 @app.post("/api/patients/intake")
 def create_intake_patient(payload: IntakePatientPayload):
     return predict_new_patient(payload.model_dump(), persist=True)
+
+
+@app.post("/api/agentic/analyze")
+def analyze_agentic_patient(patient: dict[str, Any]):
+    return run_agentic_patient_pipeline(patient)
 
 
 @app.post("/api/prescription/extract")

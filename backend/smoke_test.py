@@ -47,6 +47,8 @@ def main():
     assert health["patients_loaded"] > 0
     assert "llm_priority_limit" in health
     assert "llm_priority_patients" in health
+    assert "agentic_provider" in health
+    assert "agentic_model" in health
     assert "ml_enabled" in health
     assert "ml_models_ready" in health
     assert health["ml_model_version"]
