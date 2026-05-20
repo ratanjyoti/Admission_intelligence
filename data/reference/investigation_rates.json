@@ -1,0 +1,21 @@
+{
+  "cbc": 255,
+  "renal function test": 400,
+  "liver function test": 425,
+  "electrolytes": 680,
+  "ecg": 149,
+  "echocardiogram": 1254,
+  "chest x-ray": 196,
+  "ct scan": 2805,
+  "mri": 4250,
+  "blood culture": 650,
+  "urine culture": 350,
+  "dialysis": 5100,
+  "ventilator support": 2550,
+  "oxygen therapy": 85,
+  "pathology panel": 5950,
+  "histopathology": 850,
+  "biopsy": 7360,
+  "consultation charges": 350,
+  "icu investigations": 5400
+}

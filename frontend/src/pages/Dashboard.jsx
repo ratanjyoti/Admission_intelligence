@@ -36,8 +36,8 @@ import {
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
 import LoadingScreen from "../components/LoadingScreen";
-import { getDashboardCharts, getPatients } from "../lib/api";
-import { buildDashboardSummary } from "../lib/patientData";
+import { getAgenticPriorityQueue, getPatients } from "../lib/api";
+import { buildDashboardCharts, buildDashboardSummary } from "../lib/patientData";
 
 const COLORS = {
   Critical: "#dc2626",
@@ -362,6 +362,10 @@ export default function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(25);
   const [reloadKey, setReloadKey] = useState(0);
+  const [priorityQueue, setPriorityQueue] = useState([]);
+  const [priorityQueueLoading, setPriorityQueueLoading] = useState(false);
+  const [priorityQueueError, setPriorityQueueError] = useState("");
+  const [priorityQueueActive, setPriorityQueueActive] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -371,17 +375,15 @@ export default function Dashboard() {
       setError("");
 
       try {
-        const [patientsData, chartsData] = await Promise.all([
-          getPatients(),
-          getDashboardCharts(),
-        ]);
+        const patientsData = await getPatients();
 
         if (!isActive) {
           return;
         }
 
-        setPatients(patientsData || []);
-        setCharts(chartsData);
+        const normalizedPatients = patientsData || [];
+        setPatients(normalizedPatients);
+        setCharts(buildDashboardCharts(normalizedPatients));
       } catch (loadError) {
         if (!isActive) {
           return;
@@ -579,6 +581,33 @@ export default function Dashboard() {
     [filteredPatients]
   );
 
+  const priorityQueuePatients = useMemo(() => {
+    if (!priorityQueue?.length) {
+      return [];
+    }
+
+    const patientMap = new Map(
+      patients
+        .filter((patient) => patient.patientId)
+        .map((patient) => [patient.patientId, patient])
+    );
+
+    return priorityQueue.map((item) => {
+      const patient = patientMap.get(item.patientId) || {};
+      return {
+        ...patient,
+        llmPriorityRank: item.priorityRank,
+        llmPriorityScore: item.priorityScore,
+        llmPriorityReason: item.reason,
+        llmPrioritySuggestedAction: item.suggestedAction,
+        llmPriorityValidationStatus: item.validationStatus,
+        llmPriorityUsedCache: item.usedCache,
+      };
+    });
+  }, [priorityQueue, patients]);
+
+  const displayPatients = priorityQueueActive ? priorityQueuePatients : sortedPatients;
+
   const departmentOptions = useMemo(
     () => [
       "All",
@@ -664,13 +693,13 @@ export default function Dashboard() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(sortedPatients.length / rowsPerPage)
+    Math.ceil(displayPatients.length / rowsPerPage)
   );
   const pageStartIndex = (currentPage - 1) * rowsPerPage;
   const pageEndIndex = pageStartIndex + rowsPerPage;
-  const paginatedPatients = sortedPatients.slice(pageStartIndex, pageEndIndex);
-  const rangeStart = sortedPatients.length === 0 ? 0 : pageStartIndex + 1;
-  const rangeEnd = Math.min(pageEndIndex, sortedPatients.length);
+  const paginatedPatients = displayPatients.slice(pageStartIndex, pageEndIndex);
+  const rangeStart = displayPatients.length === 0 ? 0 : pageStartIndex + 1;
+  const rangeEnd = Math.min(pageEndIndex, displayPatients.length);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -695,6 +724,14 @@ export default function Dashboard() {
       setCurrentPage(totalPages);
     }
   }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (priorityQueueActive) {
+      setPriorityQueueActive(false);
+      setPriorityQueue([]);
+      setPriorityQueueError("");
+    }
+  }, [filteredPatients]);
 
   function navigateWithFilters(updates, { clearPriorityFilters = false } = {}) {
     const nextSearchParams = new URLSearchParams(searchParams);
@@ -721,11 +758,11 @@ export default function Dashboard() {
   }
 
   function exportFilteredPatientsCsv() {
-    if (sortedPatients.length === 0) {
+    if (displayPatients.length === 0) {
       return;
     }
 
-    const csvContent = buildPatientsCsv(sortedPatients);
+    const csvContent = buildPatientsCsv(displayPatients);
     const fileSuffix =
       departmentFilter === "All"
         ? "all-departments"
@@ -747,6 +784,40 @@ export default function Dashboard() {
   function clearPriorityView() {
     navigateWithFilters({}, { clearPriorityFilters: true });
     setCurrentPage(1);
+  }
+
+  async function runAgenticPriorityQueue() {
+    setPriorityQueueError("");
+    setPriorityQueueLoading(true);
+
+    try {
+      const patientIds = filteredPatients
+        .map((patient) => patient.patientId)
+        .filter(Boolean);
+
+      if (patientIds.length === 0) {
+        setPriorityQueueError("There are no patients available for LLM queue prioritization.");
+        setPriorityQueueActive(false);
+        setPriorityQueue([]);
+        return;
+      }
+
+      const result = await getAgenticPriorityQueue({
+        limit: 10,
+        patientIds,
+        useCache: true,
+      });
+
+      setPriorityQueue(result.prioritizedPatients || []);
+      setPriorityQueueActive(true);
+      setCurrentPage(1);
+    } catch (error) {
+      setPriorityQueueError(error?.message || "LLM priority queue failed. Please try again.");
+      setPriorityQueueActive(false);
+      setPriorityQueue([]);
+    } finally {
+      setPriorityQueueLoading(false);
+    }
   }
 
   function handlePriorityViewClick(viewKey) {
@@ -978,7 +1049,7 @@ export default function Dashboard() {
               {activePriorityView.label}
             </h2>
             <p className="mt-1 text-sm text-blue-800">
-              {activePriorityView.description} {sortedPatients.length} matching
+              {activePriorityView.description} {displayPatients.length} matching
               patients are currently in view after the active filters.
             </p>
           </div>
@@ -1316,25 +1387,52 @@ export default function Dashboard() {
               AI-Prioritized Patient Worklist
             </h2>
             <p className="text-sm text-slate-500">
-              Showing {rangeStart}-{rangeEnd} of {sortedPatients.length} matching
+              Showing {rangeStart}-{rangeEnd} of {displayPatients.length} matching
               patients
               {hasActivePriorityView
                 ? ` in ${activePriorityView.label}.`
                 : "."}
             </p>
+            {priorityQueueActive && (
+              <p className="mt-1 text-sm text-blue-700">
+                Showing the top {priorityQueue.length} cases ranked by LLM review.
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <button
               type="button"
+              onClick={runAgenticPriorityQueue}
+              disabled={priorityQueueLoading || filteredPatients.length === 0}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Brain className="h-4 w-4" />
+              {priorityQueueLoading ? "Running LLM queue…" : "Run LLM priority queue"}
+            </button>
+            {priorityQueueActive && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPriorityQueueActive(false);
+                  setPriorityQueue([]);
+                  setPriorityQueueError("");
+                  setCurrentPage(1);
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-3 py-2 text-sm font-semibold text-blue-700 hover:border-blue-300 hover:text-blue-900"
+              >
+                Clear LLM queue
+              </button>
+            )}
+            <button
+              type="button"
               onClick={exportFilteredPatientsCsv}
-              disabled={sortedPatients.length === 0}
+              disabled={displayPatients.length === 0}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-4 w-4" />
               Export CSV
             </button>
-
             <label className="flex items-center gap-2 text-sm text-slate-600">
               <span>Rows per page</span>
               <select
@@ -1378,6 +1476,12 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {priorityQueueError ? (
+          <div className="mx-5 mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {priorityQueueError}
+          </div>
+        ) : null}
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-slate-600">
@@ -1385,6 +1489,7 @@ export default function Dashboard() {
                 <th className="p-4">Patient</th>
                 <th className="p-4">Doctor</th>
                 <th className="p-4">Department</th>
+                {priorityQueueActive && <th className="p-4">LLM Rank</th>}
                 <th className="p-4">Case Type</th>
                 <th className="p-4">Risk</th>
                 <th className="p-4">Admission</th>
@@ -1433,6 +1538,18 @@ export default function Dashboard() {
                   <td className="max-w-[220px] p-4 text-slate-700">
                     {patient.department}
                   </td>
+                  {priorityQueueActive && (
+                    <td className="p-4 text-slate-700">
+                      <p className="font-semibold text-slate-800">
+                        {patient.llmPriorityRank != null ? `#${patient.llmPriorityRank}` : "—"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {patient.llmPriorityScore != null
+                          ? `Score ${patient.llmPriorityScore}`
+                          : "Score unavailable"}
+                      </p>
+                    </td>
+                  )}
                   <td className="p-4 text-slate-700">
                     <p className="font-medium text-slate-800">
                       {patient.operational?.caseType?.label || "Not classified"}

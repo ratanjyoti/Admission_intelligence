@@ -670,6 +670,10 @@ def merge_operational_payloads(base_payload, llm_payload):
     merged = dict(base_payload)
 
     for key, value in llm_payload.items():
+        if key == "packageIntelligence":
+            # Preserve structured/reference-based revenue calculation over LLM revenue output.
+            continue
+
         if isinstance(value, dict) and isinstance(merged.get(key), dict):
             merged[key] = {**merged[key], **value}
         else:

@@ -38,7 +38,7 @@ FastAPI backend
 Predictive ML layer
         |
         v
-Operational intelligence and rule-validation layer
+Operational intelligence, safety-rule validation, and on-demand LLM-first review
         |
         v
 PostgreSQL LLM cache or local fallback cache
@@ -99,6 +99,8 @@ GET /api/dashboard/summary
 GET /api/dashboard/charts
 POST /api/predict/patient
 POST /api/patients/intake
+POST /api/agentic/analyze
+POST /api/agentic/prioritize
 POST /api/prescription/extract
 ```
 
@@ -157,33 +159,38 @@ The backend will start on `http://127.0.0.1:8000`.
 
 Optional LLM intelligence:
 
-Create `backend/.env` from [backend/.env.example](backend/.env.example) and add:
+Create `backend/.env` and add:
 
 ```env
-LLM_PROVIDER=groq
 GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
-ENABLE_LLM_INTELLIGENCE=true
+AGENTIC_PROVIDER=groq
+AGENTIC_MODEL=llama-3.3-70b-versatile
+AGENTIC_RISK_ENABLED=false
+LLM_PRIORITY_LIMIT=3
 DATABASE_URL=postgresql://postgres:password@localhost:5432/docstribe
-LLM_CACHE_LIMIT=5
 ENABLE_ML_PREDICTIONS=true
 ```
 
-If you prefer OpenAI instead of Groq, switch `LLM_PROVIDER=openai` and use `OPENAI_API_KEY` plus `OPENAI_MODEL`.
+If you prefer OpenAI instead of Groq, switch `AGENTIC_PROVIDER=openai` and use `OPENAI_API_KEY` plus `AGENTIC_MODEL`.
 
-If `DATABASE_URL` is set, cached LLM intelligence is stored in PostgreSQL and reused across restarts and redeploys. If it is not set, the backend falls back to the local JSON cache file.
+If `DATABASE_URL` is set, cached agentic risk reviews are stored in PostgreSQL and reused across restarts and redeploys. If it is not set, the backend falls back to the local JSON cache file.
 
-By default, Docstribe uses rule-based intelligence for the full 422-patient dataset and reserves LLM enrichment for the top `10` priority patients only. You can change that cohort size with:
+Recommended setup for API-limited deployments:
 
 ```env
-LLM_PRIORITY_LIMIT=10
+AGENTIC_RISK_ENABLED=false
+LLM_PRIORITY_LIMIT=3
 ```
 
-If you want to precompute cached LLM enrichment for the full dataset:
+With this setup, the normal dashboard flow stays fast for all 422 patients through rules and ML, while the LLM-first path is triggered only for one selected patient at a time through `POST /api/agentic/analyze`.
 
-```bash
-python backend/generate_llm_cache.py
-```
+For queue-priority mode, use `POST /api/agentic/prioritize`. That endpoint:
+
+- loads the patient list through the normal rules and ML path
+- shortlists only the top `LLM_PRIORITY_LIMIT` suspicious patients
+- asks the LLM to prioritize only that shortlist
+- validates each priority result with backend safety rules
+- returns a sorted `prioritizedPatients` queue for the frontend
 
 If you want to pre-train the predictive models before serving live intake requests:
 
@@ -237,14 +244,13 @@ The `New Patient Intake` page depends on the live backend because it uses the pr
 - Use `uvicorn backend.main:app --host 0.0.0.0 --port $PORT` as the start command
 - Set the health check path to `/api/health`
 - Set backend environment variables:
-- `LLM_PROVIDER=groq`
 - `GROQ_API_KEY=...`
-- `GROQ_MODEL=llama-3.3-70b-versatile`
-- `ENABLE_LLM_INTELLIGENCE=true`
+- `AGENTIC_PROVIDER=groq`
+- `AGENTIC_MODEL=llama-3.3-70b-versatile`
+- `AGENTIC_RISK_ENABLED=false`
 - `ENABLE_ML_PREDICTIONS=true`
 - `DATABASE_URL=<render-postgres-internal-url>`
-- `LLM_PRIORITY_LIMIT=10`
-- Optionally set `LLM_CACHE_LIMIT=5` for a short trial run before caching all 422 patients
+- `LLM_PRIORITY_LIMIT=3`
 - Optionally run `python backend/train_ml_models.py` once during setup to avoid first-request training latency on the intake route
 - Confirm `/api/health`, `/api/patients`, `/api/dashboard/summary`, and `/api/dashboard/charts` respond correctly after deploy
 - Confirm `/api/health` shows `cache_backend: "postgres"`, `database_connected: true`, and the ML status fields
@@ -320,9 +326,9 @@ python backend/smoke_test.py
 
 ### 2. Patient Decision Support
 
-- Open a top-priority patient profile
+- Open a patient profile and run the on-demand LLM-first risk review
 - Show `AI Mode`, risk gauge, procedure confidence, operational forecast cards, timeline, and structured evidence
-- Explain the difference between rule-based and selective LLM enrichment
+- Explain the difference between the fast rule-based path and the validated one-patient LLM-first review
 
 ### 3. Department Intelligence
 
@@ -342,7 +348,7 @@ python backend/smoke_test.py
 ### 5. AI Architecture and Traceability
 
 - Open `/architecture`
-- Walk through the EMR -> predictive ML -> rule validation -> selective LLM enrichment -> API -> dashboard pipeline
+- Walk through the EMR -> predictive ML -> rule validation -> on-demand LLM-first review -> API -> dashboard pipeline
 - Show output mapping, risk factor breakdown, and how AI decisions are grounded in source evidence
 
 ## Known Limitations

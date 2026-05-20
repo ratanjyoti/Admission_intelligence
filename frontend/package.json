@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --configLoader native --host 0.0.0.0 --port 5173 --strictPort",
+    "dev:kill": "powershell -Command \"$line = netstat -ano | Select-String ':5173' | Select-String 'LISTENING' | Select-Object -First 1; if ($line) { $procId = ($line -split '\\\\s+')[-1]; try { Stop-Process -Id $procId -Force -ErrorAction Stop } catch {} }; exit 0\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"

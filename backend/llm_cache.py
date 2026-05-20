@@ -4,9 +4,12 @@ import json
 from backend.models import LLMPatientIntelligence
 
 
-def make_source_hash(patient_payload):
+def make_source_hash(patient_payload, workflow_version=None):
     raw_text = json.dumps(patient_payload, sort_keys=True, default=str, ensure_ascii=True)
-    return hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(raw_text.encode("utf-8")).hexdigest()
+    if workflow_version:
+        return f"{digest}:{workflow_version}"
+    return digest
 
 
 def get_cached_intelligence(db, patient_id, source_hash):

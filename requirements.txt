@@ -4,6 +4,7 @@ numpy
 fastapi
 uvicorn[standard]
 openai
+google-generativeai
 python-dotenv
 sqlalchemy
 psycopg2-binary
@@ -12,4 +13,5 @@ joblib
 xgboost
 lightgbm
 PyMuPDF
+pdfplumber
 python-multipart

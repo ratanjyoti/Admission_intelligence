@@ -6,11 +6,16 @@ from datetime import datetime
 from urllib.parse import unquote
 
 from backend.agentic.mapper import safe_merge_agentic_into_operational
-from backend.agentic.orchestrator import run_agentic_patient_pipeline
+from backend.agentic.orchestrator import (
+    get_cached_agentic_patient_pipeline,
+    run_agentic_patient_pipeline,
+)
+from backend.clinical_llm import maybe_generate_clinical_plan
 from backend.llm_intelligence import (
     maybe_generate_llm_operational,
     merge_operational_payloads,
 )
+from backend.revenue_estimator import build_revenue_package_payload
 
 PRIORITY_RISK_POINTS = {"Critical": 50, "High": 32, "Medium": 16, "Low": 6}
 PRIORITY_ADMISSION_POINTS = {"Emergency": 28, "Urgent": 18, "Elective": 8}
@@ -421,13 +426,14 @@ def extract_excerpt(text, keyword, radius=84):
 
 def find_rule_match(sections, keywords):
     for section in sections:
-        content = clean_text(section["content"])
+        content = section["content"]
 
         if not content:
             continue
 
+        content_lower = content.lower()
         for keyword in keywords:
-            if re.search(re.escape(keyword), content, re.IGNORECASE):
+            if keyword.lower() in content_lower:
                 return {
                     "keyword": keyword,
                     "source": section["title"],
@@ -1247,11 +1253,17 @@ def build_rule_based_operational_payload(patient, signals=None):
         clinical_intelligence,
     )
 
+    length_of_stay = derive_length_of_stay(patient, signals, case_type["label"])
     return {
         "clinicalIntelligence": clinical_intelligence,
         "caseType": case_type,
-        "packageIntelligence": derive_revenue_package(patient, signals, case_type["label"]),
-        "lengthOfStay": derive_length_of_stay(patient, signals, case_type["label"]),
+        "packageIntelligence": build_revenue_package_payload(
+            patient,
+            signals,
+            case_type["label"],
+            length_of_stay,
+        ),
+        "lengthOfStay": length_of_stay,
         "readmissionRisk": readmission_risk,
         "noShowRisk": no_show_risk,
         "deferredTime": deferred_time,
@@ -1373,6 +1385,8 @@ def derive_operational_intelligence(
     llm_allowed=False,
     allow_live_llm=False,
     include_predictive_modeling=False,
+    include_cached_agentic=False,
+    allow_live_agentic=False,
 ):
     signals = detect_signals(patient)
     base_payload = build_rule_based_operational_payload(patient, signals)
@@ -1401,34 +1415,69 @@ def derive_operational_intelligence(
         allow_live_generation=allow_live_llm,
     )
 
+    clinical_plan_payload = maybe_generate_clinical_plan(
+        patient,
+        allow_live_generation=allow_live_llm,
+    )
+
+    if clinical_plan_payload is None:
+        clinical_plan_payload = {
+            "clinicalPlan": {
+                "likelyAdmission": True,
+                "likelyProcedures": [],
+                "likelyBedType": patient.get("bed", {}).get("type", "General Ward"),
+                "estimatedLOS": int(base_payload.get("lengthOfStay", {}).get("minDays", 1)),
+                "confidence": 0.0,
+                "reasoning": "Fallback clinical plan derived from case type and bed assignment.",
+            }
+        }
+
     merged_payload = merge_operational_payloads(base_payload, llm_payload)
+    merged_payload = merge_operational_payloads(merged_payload, clinical_plan_payload)
     merged_payload["risk_source"] = "fallback_ml_rules"
     merged_payload["predictiveModeling"] = predictive_modeling
 
-    if should_use_agentic_risk():
-        try:
+    if merged_payload.get("clinicalPlan"):
+        merged_payload["packageIntelligence"] = build_revenue_package_payload(
+            patient,
+            signals,
+            merged_payload["caseType"]["label"],
+            merged_payload.get("lengthOfStay"),
+            merged_payload.get("clinicalPlan"),
+        )
+
+    try:
+        agentic_result = None
+        if allow_live_agentic:
             agentic_result = run_agentic_patient_pipeline(
                 patient,
                 baseline_operational=merged_payload,
+                use_cache=True,
+                save_cache=True,
             )
+        elif include_cached_agentic:
+            agentic_result = get_cached_agentic_patient_pipeline(patient)
+
+        if agentic_result:
             merged_payload = safe_merge_agentic_into_operational(
                 merged_payload,
                 agentic_result,
             )
-        except Exception as exc:
-            merged_payload["agentic_error"] = str(exc)
-            merged_payload["risk_source"] = "fallback_ml_rules"
+    except Exception as exc:
+        merged_payload["agentic_error"] = str(exc)
+        merged_payload["risk_source"] = "fallback_ml_rules"
 
     agentic_applied = str(merged_payload.get("risk_source") or "").startswith("agentic_llm")
     merged_payload["intelligenceProfile"] = {
         "llmEligible": llm_allowed,
         "llmApplied": bool(llm_payload),
-        "agenticEnabled": should_use_agentic_risk(),
+        "agenticEnabled": bool(include_cached_agentic or allow_live_agentic),
+        "agenticOnDemandAvailable": True,
         "agenticApplied": agentic_applied,
         "primaryEngine": (
-            "Agentic LLM + ML + Rule-based"
+            "LLM-first + ML + Rule-based"
             if agentic_applied and predictive_modeling.get("enabled")
-            else "Agentic LLM + Rule-based"
+            else "LLM-first + Rule-based"
             if agentic_applied
             else "ML + LLM + Rule-based"
             if predictive_modeling.get("enabled") and llm_payload
@@ -1449,6 +1498,8 @@ def enrich_patient_record(
     llm_allowed=False,
     allow_live_llm=False,
     include_predictive_modeling=False,
+    include_cached_agentic=False,
+    allow_live_agentic=False,
 ):
     enriched_patient = copy.deepcopy(patient)
     enriched_patient["operational"] = derive_operational_intelligence(
@@ -1456,7 +1507,22 @@ def enrich_patient_record(
         llm_allowed=llm_allowed,
         allow_live_llm=allow_live_llm,
         include_predictive_modeling=include_predictive_modeling,
+        include_cached_agentic=include_cached_agentic,
+        allow_live_agentic=allow_live_agentic,
     )
+    operational = enriched_patient["operational"]
+    if str(operational.get("risk_source") or "").startswith("agentic_llm") and operational.get("risk_category"):
+        risk_payload = dict(enriched_patient.get("risk") or {})
+        risk_payload["category"] = operational.get("risk_category")
+        if operational.get("risk_score") is not None:
+            risk_payload["score"] = operational.get("risk_score")
+        if operational.get("risk_reasoning"):
+            risk_payload["reasoning"] = operational.get("risk_reasoning")
+        if operational.get("risk_confidence") is not None:
+            risk_payload["confidence"] = operational.get("risk_confidence")
+        if operational.get("key_risk_factors"):
+            risk_payload["redFlags"] = ", ".join(operational.get("key_risk_factors")[:4])
+        enriched_patient["risk"] = risk_payload
     return enriched_patient
 
 
@@ -1465,6 +1531,8 @@ def enrich_patients(
     llm_allowed=False,
     allow_live_llm=False,
     include_predictive_modeling=False,
+    include_cached_agentic=False,
+    allow_live_agentic=False,
 ):
     return [
         enrich_patient_record(
@@ -1472,6 +1540,8 @@ def enrich_patients(
             llm_allowed=llm_allowed,
             allow_live_llm=allow_live_llm,
             include_predictive_modeling=include_predictive_modeling,
+            include_cached_agentic=include_cached_agentic,
+            allow_live_agentic=allow_live_agentic,
         )
         for patient in patients
     ]

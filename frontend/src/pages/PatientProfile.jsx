@@ -27,7 +27,7 @@ import {
 import EmptyState from "../components/EmptyState";
 import ErrorState from "../components/ErrorState";
 import LoadingScreen from "../components/LoadingScreen";
-import { getPatientById } from "../lib/api";
+import { analyzeAgenticPatient, getPatientById } from "../lib/api";
 import {
   formatDate,
   getClinicalNoteSections,
@@ -340,6 +340,14 @@ function getClinicalPriorityReason(patient) {
 }
 
 function getAiModeTone(profile) {
+  if (profile?.agenticApplied) {
+    return "green";
+  }
+
+  if (profile?.agenticOnDemandAvailable) {
+    return "blue";
+  }
+
   if (profile?.llmApplied) {
     return "green";
   }
@@ -352,15 +360,11 @@ function getAiModeTone(profile) {
 }
 
 function getAiModeDescription(profile) {
-  if (profile?.llmApplied) {
-    return "This patient is in the top-priority cohort and includes LLM-assisted enrichment layered on top of the rule-based engine.";
+  if (profile?.agenticApplied) {
+    return "This patient has a saved LLM-first risk review. The model performed the main reasoning and the backend safety rules validated the final result before it was applied.";
   }
 
-  if (profile?.llmEligible) {
-    return "This patient is in the top-priority cohort and is eligible for LLM enrichment when live or cached model output is available.";
-  }
-
-  return "This patient is currently using the rule-based intelligence engine. LLM enrichment is reserved for the top-priority cohort.";
+  return "This patient is currently using the fast rule-based path. Run the on-demand LLM risk review when you want deeper reasoning for this one patient, then reuse the saved result from cache.";
 }
 
 function getConfidenceTone(confidence) {
@@ -549,7 +553,9 @@ export default function PatientProfile() {
   const [error, setError] = useState("");
   const [noteSearch, setNoteSearch] = useState("");
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [actionError, setActionError] = useState("");
+  const [actionMessage, setActionMessage] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -558,6 +564,7 @@ export default function PatientProfile() {
     async function loadPatient() {
       setLoading(true);
       setError("");
+      setActionMessage("");
 
       try {
         const patientData = await getPatientById(patientId);
@@ -699,6 +706,34 @@ export default function PatientProfile() {
     window.print();
   }
 
+  async function handleAnalyzeRisk() {
+    if (!patientId) {
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setActionError("");
+    setActionMessage("");
+
+    try {
+      const response = await analyzeAgenticPatient({ patientId });
+
+      if (response?.patient) {
+        setPatient(response.patient);
+      }
+
+      setActionMessage(
+        response?.usedCache
+          ? "Loaded the saved LLM-first risk review for this patient."
+          : "Completed the LLM-first risk review for this patient and saved it to cache."
+      );
+    } catch (analyzeError) {
+      setActionError(analyzeError.message || "Unable to run the LLM risk review right now.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }
+
   if (loading) {
     return (
       <LoadingScreen
@@ -768,6 +803,36 @@ export default function PatientProfile() {
   const aiModeLabel = intelligenceProfile.primaryEngine || "Rule-based";
   const aiModeTone = getAiModeTone(intelligenceProfile);
   const aiModeDescription = getAiModeDescription(intelligenceProfile);
+  const agenticTrace = operational.agentic_trace || {};
+  const llmFirstAssessment = agenticTrace.llm_assessment || operational.llm_first_assessment || {};
+  const agenticRiskScores = agenticTrace.risk_scores || llmFirstAssessment || {};
+  const agenticWorkflowVersion =
+    operational.agentic_workflow_version ||
+    agenticTrace.workflow_version ||
+    "Not available";
+  const riskSource = operational.risk_source || "fallback_ml_rules";
+  const hasAgenticAssessment = Boolean(
+    llmFirstAssessment.riskLevel ||
+      operational.agentic_workflow_version ||
+      agenticTrace.workflow_version
+  );
+  const riskConfidence =
+    operational.risk_confidence !== undefined && operational.risk_confidence !== null
+      ? `${Math.round(Number(operational.risk_confidence) * 100)}%`
+      : "Not available";
+  const agenticValidationStatus =
+    agenticTrace.validation_status ||
+    operational.validation_status ||
+    (hasAgenticAssessment ? "Not available" : "Not run yet");
+  const agenticReasoningTrace =
+    llmFirstAssessment.reason || agenticRiskScores.reasoning || operational.ai_rationale || "Not available";
+  const keyRiskFactors =
+    llmFirstAssessment.keyRiskFactors || operational.key_risk_factors || [];
+  const suggestedAction = llmFirstAssessment.suggestedAction || operational.operational_action;
+  const safetyFlags =
+    agenticTrace.safety_validation?.safetyFlags ||
+    operational.safety_validation?.safetyFlags ||
+    [];
 
   return (
     <div className="min-h-screen p-6">
@@ -807,6 +872,19 @@ export default function PatientProfile() {
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
+            onClick={handleAnalyzeRisk}
+            disabled={isAnalyzing}
+            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 shadow-sm hover:border-emerald-300 hover:bg-emerald-100 disabled:cursor-not-allowed disabled:border-emerald-100 disabled:bg-emerald-50 disabled:text-emerald-500"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            {isAnalyzing
+              ? "Running LLM Risk Review..."
+              : hasAgenticAssessment
+                ? "Refresh LLM Risk Review"
+                : "Run LLM Risk Review"}
+          </button>
+          <button
+            type="button"
             onClick={handlePrint}
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 hover:text-slate-900"
           >
@@ -829,6 +907,12 @@ export default function PatientProfile() {
       {actionError && (
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 print:hidden">
           {actionError}
+        </div>
+      )}
+
+      {actionMessage && (
+        <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 print:hidden">
+          {actionMessage}
         </div>
       )}
 
@@ -1095,6 +1179,53 @@ export default function PatientProfile() {
             </p>
             <p>{patient.validation?.summary}</p>
             <p>{patient.traceability?.safetyNote}</p>
+          </ReportSection>
+
+          <ReportSection title="LLM-first Risk Intelligence">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DetailItem label="Risk Source" value={riskSource} />
+              <DetailItem label="Agentic Workflow" value={agenticWorkflowVersion} />
+              <DetailItem label="Risk Confidence" value={riskConfidence} />
+              <DetailItem label="Agentic Validation" value={agenticValidationStatus} />
+              <DetailItem label="Suggested Action" value={suggestedAction} />
+            </div>
+            {hasAgenticAssessment ? (
+              <>
+                <p className="mt-4">
+                  <strong>LLM Reasoning Trace:</strong> {agenticReasoningTrace}
+                </p>
+                <div className="mt-4">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Key Risk Factors
+                  </p>
+                  <ChipList
+                    items={keyRiskFactors}
+                    emptyLabel="No key risk factors were returned."
+                    tone="red"
+                  />
+                </div>
+                <div className="mt-4">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Safety Validation Flags
+                  </p>
+                  <ChipList
+                    items={safetyFlags}
+                    emptyLabel="No additional safety flags were added."
+                    tone="orange"
+                  />
+                </div>
+                <pre className="mt-4 overflow-auto rounded-2xl border border-slate-200 bg-slate-950/95 p-4 text-xs leading-6 text-slate-100">
+                  {JSON.stringify(llmFirstAssessment || agenticRiskScores, null, 2)}
+                </pre>
+              </>
+            ) : (
+              <p className="mt-4">
+                No on-demand LLM review has been run for this patient yet. Use
+                the <strong>Run LLM Risk Review</strong> action above to analyze
+                this one case, validate it with safety rules, and save the result
+                for reuse.
+              </p>
+            )}
           </ReportSection>
 
           <ReportSection title="Evidence">

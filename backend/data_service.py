@@ -2,6 +2,7 @@ import json
 import os
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from urllib.parse import unquote
 
 from backend.operational_intelligence import (
@@ -9,6 +10,7 @@ from backend.operational_intelligence import (
     get_patient_identifier,
     rank_patients_for_llm,
 )
+from backend.revenue_knowledge import get_reference_data_signature
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -17,6 +19,7 @@ LIVE_DATA_PATH = ROOT_DIR / "data" / "processed" / "live_intake_patients.json"
 
 RISK_ORDER = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
 ADMISSION_ORDER = {"Emergency": 0, "Urgent": 1, "Elective": 2}
+PATIENT_CACHE_LOCK = Lock()
 
 
 def normalize_text(value):
@@ -55,21 +58,34 @@ def load_raw_patients():
     return load_base_patients() + load_live_patients()
 
 
+@lru_cache(maxsize=8)
+def _load_patients_cached(reference_signature):
+    return enrich_patients(
+        load_raw_patients(),
+        allow_live_llm=False,
+        include_cached_agentic=False,
+        allow_live_agentic=False,
+    )
+
+
 def load_patients():
-    return enrich_patients(load_raw_patients(), allow_live_llm=False)
+    reference_signature = get_reference_data_signature()
+    with PATIENT_CACHE_LOCK:
+        return _load_patients_cached(reference_signature)
 
 
 def get_llm_priority_limit():
     try:
-        return max(0, int(os.getenv("LLM_PRIORITY_LIMIT", "10") or "10"))
+        return max(0, int(os.getenv("LLM_PRIORITY_LIMIT", "3") or "3"))
     except ValueError:
-        return 10
+        return 3
 
 
 def clear_patient_caches():
     load_base_patients.cache_clear()
     load_live_patients.cache_clear()
     load_raw_patients.cache_clear()
+    _load_patients_cached.cache_clear()
     get_llm_priority_snapshot.cache_clear()
     get_llm_priority_patient_id_set.cache_clear()
 
@@ -185,6 +201,30 @@ def get_mid_lakhs(patient):
         or 0
     )
 
+def is_revenue_at_risk(patient):
+    operational = patient.get("operational", {})
+    package = operational.get("packageIntelligence", {})
+
+    revenue_category = package.get("revenueCategory")
+    readmission_risk = operational.get("readmissionRisk", {}).get("label")
+    deferred_time = operational.get("deferredTime", {}).get("label")
+
+    risk_category = patient.get("risk", {}).get("category")
+    admission_type = patient.get("admission", {}).get("type")
+    progression = patient.get("journey", {}).get("progressionTrend")
+
+    is_high_value = revenue_category in {"High Value", "Strategic Value"}
+
+    has_serious_risk_signal = (
+        readmission_risk == "High"
+        or deferred_time == "Cannot be safely delayed"
+        or risk_category in {"High", "Critical"}
+        or admission_type in {"Emergency", "Urgent"}
+        or progression == "Worsening"
+    )
+
+    return is_high_value and has_serious_risk_signal
+
 
 def build_summary(patients=None):
     patients = patients or load_patients()
@@ -258,9 +298,7 @@ def build_summary(patients=None):
             sum(
                 get_mid_lakhs(patient)
                 for patient in patients
-                if patient.get("operational", {}).get("packageIntelligence", {}).get("revenueCategory")
-                in {"High Value", "Strategic Value"}
-                and patient.get("operational", {}).get("noShowRisk", {}).get("label") == "High"
+                if is_revenue_at_risk(patient)
             ),
             1,
         ),

@@ -101,7 +101,7 @@ const OUTPUT_MAPPING = [
     field: "ICD-10 / Comorbidities / Symptoms",
     source: "Diagnosis, notes, medications, history, remarks",
     logic:
-      "Structured extraction from semi-structured text, then refined by selective LLM enrichment for top-priority cases.",
+      "Structured extraction from semi-structured text, with optional on-demand LLM-first review for one selected patient when deeper reasoning is needed.",
     confidence: "Medium",
   },
 ];
@@ -115,6 +115,28 @@ const RISK_BREAKDOWN = [
   ["ICU probability above threshold", "Rule override", "Safety"],
   ["High-risk progression language", "Rule override", "Validation"],
   ["LLM rationale and source mapping", "Explanation", "Transparency"],
+];
+
+const AGENTIC_STEPS = [
+  "Clinical Analyst",
+  "Risk Scorer",
+  "Pathway Planner",
+  "Operational Summarizer",
+];
+
+const ARCHITECTURE_COMPARISON = [
+  {
+    title: "Old",
+    detail:
+      "Rules calculated risk, ML forecast operational signals, and LLM mainly explained or enriched selected cases.",
+    tone: "bg-slate-50 border-slate-200",
+  },
+  {
+    title: "New",
+    detail:
+      "An on-demand LLM-first review calculates contextual risk for one selected patient, while ML baseline and rules validate, backstop, and cache the final payload.",
+    tone: "bg-blue-50 border-blue-200",
+  },
 ];
 
 function ToneBadge({ children, tone = "slate" }) {
@@ -170,7 +192,7 @@ export default function Architecture() {
   B[Preprocessing + Text Cleanup]
   C[Predictive ML Models]
   D[Rule Validation Layer]
-  E[Top-10 LLM Enrichment]
+  E[On-demand LLM Review]
   F[Cache + Merged Intelligence Payload]
   G[FastAPI API Layer]
   H[Dashboard / Patient Profile / PDF / Intake]
@@ -211,10 +233,10 @@ export default function Architecture() {
         <section className="rounded-3xl border border-slate-200 bg-slate-900 p-6 text-white shadow-sm">
           <h2 className="text-xl font-semibold">Hybrid AI Strategy</h2>
           <p className="mt-2 text-sm leading-6 text-slate-300">
-            Predictive ML handles the first forecast for new and existing patient
-            records. Rules then validate safety-critical cases, and LLM enrichment
-            is intentionally limited to the top-priority cohort to control latency,
-            cost, and explainability risk.
+            Predictive ML and rules handle the fast default path for the full
+            patient list. When a team member needs deeper reasoning for one case,
+            the patient profile can trigger an on-demand LLM-first review and
+            then reuse the saved result from cache.
           </p>
 
           <div className="mt-5 space-y-4">
@@ -222,15 +244,16 @@ export default function Architecture() {
               <p className="font-semibold">All Patients</p>
               <p className="mt-2 text-sm text-slate-300">
                 Risk, admission, bed, ICU, LOS, readmission, deferability, and
-                revenue signals can be forecast through the predictive ML layer.
+                revenue signals stay fast through the predictive ML and rule-based
+                layer.
               </p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
-              <p className="font-semibold">Rules + LLM</p>
+              <p className="font-semibold">One-patient LLM Review</p>
               <p className="mt-2 text-sm text-slate-300">
-                Rules validate under-triage risk, and LLM adds richer clinical
-                normalization, structured reasoning, stronger coding support, and
-                deeper treatment-pathway context.
+                The LLM becomes the main reasoning layer for a selected patient,
+                then backend safety rules validate the output and cache the
+                result for reuse.
               </p>
             </div>
             <div className="rounded-2xl bg-white/10 p-4">
@@ -244,6 +267,44 @@ export default function Architecture() {
           </div>
         </section>
       </div>
+
+      <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-semibold text-slate-900">
+          New Agentic Risk Workflow
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          The new backend branch introduces a staged agent pipeline that separates
+          extraction, risk scoring, pathway planning, and operational synthesis.
+        </p>
+
+        <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-4">
+          {AGENTIC_STEPS.map((step, index) => (
+            <div
+              key={step}
+              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Step {index + 1}
+              </p>
+              <p className="mt-2 font-semibold text-slate-900">{step}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {ARCHITECTURE_COMPARISON.map((item) => (
+            <div
+              key={item.title}
+              className={`rounded-2xl border p-5 ${item.tone}`}
+            >
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+                {item.title}
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">{item.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="mt-6 rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-200 p-6">

@@ -1,12 +1,17 @@
 from pathlib import Path
 import sys
 import json
+import os
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+# Keep the general smoke test fast by default even if backend/.env enables the
+# LLM-first path globally. You can opt in with SMOKE_TEST_AGENTIC_ENABLED=true.
+os.environ["AGENTIC_RISK_ENABLED"] = os.getenv("SMOKE_TEST_AGENTIC_ENABLED", "false")
 
 
 from backend.main import (
