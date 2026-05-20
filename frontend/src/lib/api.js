@@ -5,15 +5,39 @@ import {
 } from "./patientData";
 import { enrichPatientRecord } from "./operationalIntelligence";
 
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL || ""
-).replace(/\/$/, "");
+const IS_PRODUCTION_BUILD = Boolean(import.meta.env.PROD);
+const MISSING_API_URL_ERROR =
+  "Missing VITE_API_BASE_URL for production. Set it in Vercel project environment variables to your backend base URL.";
+
+function normalizeApiBaseUrl(rawValue) {
+  const trimmed = String(rawValue || "").trim().replace(/\/+$/, "");
+  if (!trimmed) {
+    return "";
+  }
+
+  // Support common misconfiguration where URL is entered with a trailing /api.
+  if (trimmed.toLowerCase().endsWith("/api")) {
+    return trimmed.slice(0, -4);
+  }
+
+  return trimmed;
+}
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || "");
+const API_CONNECTIVITY_HINT = API_BASE_URL
+  ? `Unable to reach backend at ${API_BASE_URL}.`
+  : IS_PRODUCTION_BUILD
+    ? "VITE_API_BASE_URL is missing in deployment."
+    : "Start the backend (port 8000).";
 const CLIENT_FALLBACK_ENABLED =
   String(import.meta.env.VITE_ENABLE_CLIENT_FALLBACK || "").toLowerCase() === "true";
 const FALLBACK_DATA_URL = `${import.meta.env.BASE_URL}data/dashboard_patients.json`;
 let fallbackPatientDataPromise;
 
 function buildApiUrl(path) {
+  if (IS_PRODUCTION_BUILD && !API_BASE_URL) {
+    throw new Error(MISSING_API_URL_ERROR);
+  }
   return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
 }
 
@@ -158,7 +182,7 @@ export function getPatients() {
     fallbackFactory: async () => ensureOperationalPatients(await loadFallbackPatientData()),
     requireBackend: true,
     backendErrorMessage:
-      "Start the backend (port 8000) so revenue uses official extracted package rates.",
+      `${API_CONNECTIVITY_HINT} Revenue uses official extracted package rates.`,
   }).then(ensureOperationalPatients);
 }
 
@@ -170,7 +194,7 @@ export function getPatientById(patientId) {
     },
     requireBackend: true,
     backendErrorMessage:
-      "Patient profile pricing requires backend official-rate inference and cannot use local fallback.",
+      `${API_CONNECTIVITY_HINT} Patient profile pricing requires backend official-rate inference and cannot use local fallback.`,
   }).then(ensureOperationalPatient);
 }
 
@@ -182,7 +206,7 @@ export function getDashboardSummary() {
     },
     requireBackend: true,
     backendErrorMessage:
-      "Dashboard summary is locked to backend data so official PDF rates are preserved.",
+      `${API_CONNECTIVITY_HINT} Dashboard summary is locked to backend data so official PDF rates are preserved.`,
   });
 }
 
@@ -194,7 +218,7 @@ export function getDashboardCharts() {
     },
     requireBackend: true,
     backendErrorMessage:
-      "Dashboard charts are locked to backend data so official PDF rates are preserved.",
+      `${API_CONNECTIVITY_HINT} Dashboard charts are locked to backend data so official PDF rates are preserved.`,
   });
 }
 

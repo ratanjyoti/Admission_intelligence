@@ -267,7 +267,9 @@ VITE_API_BASE_URL=https://your-render-backend-url
 - Root Directory: `frontend`
 - Build Command: `npm run build`
 - Output Directory: `dist`
-- Keep `frontend/vercel.json` for SPA routing support
+- Set `VITE_API_BASE_URL` in Vercel for every environment (`Production`, `Preview`, and `Development`)
+- Do not use `localhost` and do not append `/api` to the URL
+- Keep the root [vercel.json](C:/Users/LENOVO/Downloads/Docstribe/vercel.json:1) for SPA routing support when deploying from repository root
 - After deploy, verify the navbar shows `API Connected` against the Render backend
 - Verify `/intake/new-patient` can predict a new patient and optionally save that patient into the live worklist
 

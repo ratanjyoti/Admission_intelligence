@@ -931,20 +931,6 @@ def derive_bed_rates(
 
 
 def derive_investigation_rates(cghs_packages: list[dict[str, Any]]) -> dict[str, int]:
-    code_lookup: dict[str, list[float]] = {}
-    for package in cghs_packages:
-        code = normalize_pdf_cell(package.get("packageCode", "")).upper()
-        price = package.get("basePrice")
-        if not code or not isinstance(price, (int, float)) or float(price) <= 0:
-            continue
-        code_lookup.setdefault(code, []).append(float(price))
-
-    def _rates_for_codes(codes: list[str]) -> list[float]:
-        values: list[float] = []
-        for code in codes:
-            values.extend(code_lookup.get(code.upper(), []))
-        return values
-
     investigation_patterns: dict[str, list[str]] = {
         "cbc": [r"\bcbc\b", r"complete\s+haemogram", r"complete\s+blood\s+count"],
         "renal function test": [r"\bkft\b", r"kidney\s+function\s+test", r"renal\s+function"],
@@ -993,25 +979,10 @@ def derive_investigation_rates(cghs_packages: list[dict[str, Any]]) -> dict[str,
         "consultation charges": 350,
         "icu investigations": 5400,
     }
-    code_overrides: dict[str, list[str]] = {
-        "cbc": ["CGHS-LB012"],
-        "renal function test": ["CGHS-LB123"],
-        "liver function test": ["CGHS-LB124"],
-        "electrolytes": ["CGHS-LB120"],
-        "ecg": ["CGHS-CI001"],
-        "echocardiogram": ["CGHS-RI001"],
-        "chest x-ray": ["CGHS-RI034", "CGHS-RI035"],
-        "ventilator support": ["CGHS-CC003"],
-        "oxygen therapy": ["CGHS-CC002"],
-        "histopathology": ["CGHS-LB050", "CGHS-LB051"],
-        "consultation charges": ["CGHS-CN001", "CGHS-CN002", "CGHS-CN003"],
-        "icu investigations": ["CGHS-CC001"],
-    }
 
     rates: dict[str, int] = {}
     for key, patterns in investigation_patterns.items():
-        override_values = _rates_for_codes(code_overrides.get(key, []))
-        values = override_values or _search_cghs_prices(cghs_packages, patterns, exclude_patterns=exclusions.get(key))
+        values = _search_cghs_prices(cghs_packages, patterns, exclude_patterns=exclusions.get(key))
         rates[key] = _median_or_fallback(values, fallback_rates[key])
 
     return rates

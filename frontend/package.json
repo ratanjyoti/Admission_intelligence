@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader native --host 0.0.0.0 --port 5173 --strictPort",
-    "dev:kill": "powershell -Command \"$line = netstat -ano | Select-String ':5173' | Select-String 'LISTENING' | Select-Object -First 1; if ($line) { $procId = ($line -split '\\\\s+')[-1]; try { Stop-Process -Id $procId -Force -ErrorAction Stop } catch {} }; exit 0\"",
-    "build": "vite build",
+    "dev:kill": "powershell -Command \"$procIds = @(netstat -ano | Select-String ':5173' | Select-String 'LISTENING' | ForEach-Object { ($_ -split '\\\\s+')[-1] } | Where-Object { $_ -match '^[0-9]+$' } | Select-Object -Unique); foreach ($procId in $procIds) { try { Stop-Process -Id $procId -Force -ErrorAction Stop } catch {} }; exit 0\"",
+    "build": "node scripts/verify-env.mjs && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
