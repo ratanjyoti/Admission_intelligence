@@ -104,6 +104,12 @@ POST /api/agentic/prioritize
 POST /api/prescription/extract
 ```
 
+`GET /api/patients/{patient_id}` supports optional query flags:
+- `include_cached_agentic=true|false` (default `false`)
+- `include_predictive_modeling=true|false` (default `false`)
+
+Use the defaults for the fastest profile load in production, and enable flags only when that extra payload is required.
+
 Predictive model reports are generated at:
 
 ```text

@@ -2,7 +2,7 @@ import os
 from importlib.util import find_spec
 from typing import Any, Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
@@ -227,7 +227,17 @@ def get_patients():
 
 
 @app.get("/api/patients/{patient_id}")
-def get_patient(patient_id: str):
+def get_patient(
+    patient_id: str,
+    include_cached_agentic: bool = Query(
+        default=False,
+        description="Include cached agentic LLM risk payload (can add latency if cache DB is unhealthy).",
+    ),
+    include_predictive_modeling: bool = Query(
+        default=False,
+        description="Include predictive ML payload for this patient profile.",
+    ),
+):
     patient = find_patient_by_id(patient_id)
 
     if not patient:
@@ -237,8 +247,8 @@ def get_patient(patient_id: str):
         patient,
         llm_allowed=False,
         allow_live_llm=False,
-        include_predictive_modeling=True,
-        include_cached_agentic=True,
+        include_predictive_modeling=include_predictive_modeling,
+        include_cached_agentic=include_cached_agentic,
         allow_live_agentic=False,
     )
 
@@ -300,7 +310,7 @@ def analyze_agentic_patient(payload: AgenticAnalyzePayload):
         patient,
         llm_allowed=False,
         allow_live_llm=False,
-        include_predictive_modeling=True,
+        include_predictive_modeling=False,
         include_cached_agentic=True,
         allow_live_agentic=False,
     )

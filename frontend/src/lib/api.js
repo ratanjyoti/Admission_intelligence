@@ -6,7 +6,6 @@ import {
 import { enrichPatientRecord } from "./operationalIntelligence";
 
 const IS_PRODUCTION_BUILD = Boolean(import.meta.env.PROD);
-const DEPLOY_FALLBACK_API_BASE_URL = "https://admission-intelligence-1.onrender.com";
 const MISSING_API_URL_ERROR =
   "Missing VITE_API_BASE_URL for production. Set it in Vercel project environment variables to your backend base URL.";
 
@@ -34,9 +33,7 @@ function normalizeApiBaseUrl(rawValue) {
   return trimmed;
 }
 
-const API_BASE_URL =
-  normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || "")
-  || (IS_PRODUCTION_BUILD ? DEPLOY_FALLBACK_API_BASE_URL : "");
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || "");
 const API_CONNECTIVITY_HINT = API_BASE_URL
   ? `Unable to reach backend at ${API_BASE_URL}.`
   : IS_PRODUCTION_BUILD
@@ -199,8 +196,18 @@ export function getPatients() {
   }).then(ensureOperationalPatients);
 }
 
-export function getPatientById(patientId) {
-  return fetchJson(`/api/patients/${encodeURIComponent(patientId)}`, {
+export function getPatientById(patientId, options = {}) {
+  const {
+    includeCachedAgentic = false,
+    includePredictiveModeling = false,
+  } = options;
+
+  const queryParams = new URLSearchParams({
+    include_cached_agentic: String(Boolean(includeCachedAgentic)),
+    include_predictive_modeling: String(Boolean(includePredictiveModeling)),
+  });
+
+  return fetchJson(`/api/patients/${encodeURIComponent(patientId)}?${queryParams.toString()}`, {
     fallbackFactory: async () => {
       const fallbackPatientData = await loadFallbackPatientData();
       return ensureOperationalPatient(findPatientById(fallbackPatientData, patientId));
