@@ -15,6 +15,16 @@ function normalizeApiBaseUrl(rawValue) {
     return "";
   }
 
+  // Reject placeholder-style values to avoid silent broken deployments.
+  if (
+    trimmed.includes("<")
+    || trimmed.includes(">")
+    || trimmed.toLowerCase().includes("your-render-backend-service")
+    || trimmed.toLowerCase().includes("example.com")
+  ) {
+    return "";
+  }
+
   // Support common misconfiguration where URL is entered with a trailing /api.
   if (trimmed.toLowerCase().endsWith("/api")) {
     return trimmed.slice(0, -4);
@@ -27,7 +37,7 @@ const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL || ""
 const API_CONNECTIVITY_HINT = API_BASE_URL
   ? `Unable to reach backend at ${API_BASE_URL}.`
   : IS_PRODUCTION_BUILD
-    ? "VITE_API_BASE_URL is missing in deployment."
+    ? "VITE_API_BASE_URL is missing or invalid in deployment."
     : "Start the backend (port 8000).";
 const CLIENT_FALLBACK_ENABLED =
   String(import.meta.env.VITE_ENABLE_CLIENT_FALLBACK || "").toLowerCase() === "true";
