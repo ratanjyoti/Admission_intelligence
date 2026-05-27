@@ -4,7 +4,7 @@ Docstribe is a hospital intelligence demo that combines predictive admission for
 
 ## Live Demo
 
-*   **Frontend UI:** [admission-intelligence.vercel.app]([https://admission-intelligence.vercel.app/])
+*   **Frontend UI:** [admission-intelligence.vercel.app](https://admission-intelligence.vercel.app/)
 *   **Health Check API:** [admission-intelligence.vercel.app/api/health](https://vercel.app/api/health)
 
 
